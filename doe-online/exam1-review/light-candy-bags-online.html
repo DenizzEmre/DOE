@@ -1,0 +1,931 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>The Case of the Light Candy Bags: Online Version</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F7F2EA; --panel:#FFFFFF; --ink:#1C1626; --muted:#6A6274; --line:#E3D9CB;
+  --night:#1C1626; --belt1:#2B2433; --belt2:#221C29;
+  --mA:#E8741E; --mB:#7E57C2; --mC:#4E9A2F;
+  --gold:#FDB719; --ok:#2E7D32; --bad:#C62828; --tan:#F6E7C8; --tan-ink:#3D2E10;
+  --title:"Bricolage Grotesque","Satoshi","Helvetica Neue",Arial,sans-serif;
+  --body:"Aptos","Segoe UI","Helvetica Neue",Arial,sans-serif;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#141019; --panel:#1F1928; --ink:#F3EEE6; --muted:#B3AABD; --line:#362E41;
+    --night:#0E0B12; --mA:#F28C28; --mB:#A784E0; --mC:#7CC456;
+    --ok:#7BC67E; --bad:#F07A7A; --tan:#3A2F1C; --tan-ink:#F6E7C8;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#141019; --panel:#1F1928; --ink:#F3EEE6; --muted:#B3AABD; --line:#362E41;
+  --night:#0E0B12; --mA:#F28C28; --mB:#A784E0; --mC:#7CC456;
+  --ok:#7BC67E; --bad:#F07A7A; --tan:#3A2F1C; --tan-ink:#F6E7C8;
+}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.5;padding-bottom:56px}
+h1,h2,h3{font-family:var(--title);font-weight:800;line-height:1.12;margin:0;letter-spacing:-0.01em}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.wrap{max-width:1120px;margin:0 auto;padding:0 22px}
+
+header.top{padding:20px 0 6px}
+header.top .brand{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}
+header.top h1{font-size:clamp(26px,3.4vw,38px)}
+header.top .co{color:var(--muted);font-weight:600}
+.stepper{display:flex;flex-wrap:wrap;gap:6px;margin:14px 0 4px;padding:0;list-style:none}
+.stepper button{border:1.5px solid var(--line);background:transparent;border-radius:999px;padding:6px 13px;font-size:14px;font-weight:600;color:var(--muted)}
+.stepper button.done{color:var(--ink)}
+.stepper button.done::before{content:"✓ ";color:var(--ok)}
+.stepper button[aria-current="step"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.stepper button:disabled{opacity:.45;cursor:not-allowed}
+
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:24px;margin:14px 0}
+.panel h2{font-size:clamp(24px,3vw,32px);margin-bottom:12px}
+.panel h3{font-size:20px;margin-bottom:8px}
+.panel p{max-width:68ch;margin:0 0 12px}
+.muted{color:var(--muted)}
+.callout{background:var(--tan);color:var(--tan-ink);border-radius:10px;padding:14px 16px;margin:14px 0}
+.memo{border-left:5px solid var(--mA);padding:4px 0 4px 18px;margin:16px 0}
+.memo .from{font-weight:700}
+ol.plan{padding-left:22px;margin:8px 0 0}
+ol.plan li{margin:4px 0}
+
+.btn{border:0;border-radius:9px;padding:12px 20px;font-weight:700;font-size:17px;background:var(--gold);color:#000}
+.btn.ghost{background:transparent;color:var(--ink);border:1.5px solid var(--line)}
+.btn.small{padding:7px 12px;font-size:15px}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.actions{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:18px}
+
+.field{display:flex;flex-direction:column;gap:4px;margin:10px 0;max-width:420px}
+.field label{font-weight:600}
+.field input{padding:10px 12px;border:1.5px solid var(--line);border-radius:8px;background:var(--bg)}
+
+/* choices */
+fieldset{border:0;padding:0;margin:0 0 18px}
+legend{font-family:var(--title);font-weight:800;font-size:20px;margin-bottom:8px}
+.choice{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border:1.5px solid var(--line);border-radius:10px;margin:6px 0;cursor:pointer;max-width:720px}
+.choice input{margin-top:5px}
+.choice.right{border-color:var(--ok);background:color-mix(in srgb,var(--ok) 10%,transparent)}
+.choice.wrong{border-color:var(--bad);background:color-mix(in srgb,var(--bad) 8%,transparent)}
+.why{font-size:15px;color:var(--muted);margin-top:4px}
+.feedback{font-weight:600;margin-top:8px}
+.feedback.ok{color:var(--ok)}
+.feedback.no{color:var(--bad)}
+
+/* factory */
+.factory{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:18px;align-items:start}
+@media (max-width:860px){.factory{grid-template-columns:1fr}}
+.floor{background:var(--night);border-radius:14px;padding:14px;color:#F3EEE6}
+.lane{margin:6px 0 14px}
+.lane-head{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:6px;font-size:15px}
+.lane-head strong{font-family:var(--title);font-size:18px}
+.mdot{display:inline-block;width:12px;height:12px;border-radius:50%;margin-right:7px;vertical-align:0}
+.belt{position:relative;height:86px;border-radius:10px;overflow:hidden;background:repeating-linear-gradient(90deg,var(--belt1) 0 18px,var(--belt2) 18px 36px);background-size:36px 100%;animation:belt 0.7s linear infinite;border-bottom:4px solid #0007}
+@keyframes belt{to{background-position:36px 0}}
+.machine-box{position:absolute;left:0;top:0;bottom:0;width:62px;background:#0E0B12;border-right:3px solid var(--mc);display:flex;align-items:center;justify-content:center;z-index:2;font-family:var(--title);font-weight:800;font-size:28px;color:var(--mc)}
+.bag{position:absolute;left:0;top:12px;width:50px;height:62px;border:0;background:none;padding:0;z-index:1;transition:opacity .3s,top .3s}
+.bag svg{width:100%;height:100%;display:block}
+.bag:hover svg{filter:brightness(1.15)}
+.belt.full .bag{opacity:.35;pointer-events:none}
+.bag.picked{top:-70px;opacity:0;pointer-events:none}
+.pull{background:transparent;border:1px solid #ffffff40;color:#F3EEE6;border-radius:7px;padding:4px 10px;font-size:14px}
+.pull:disabled{opacity:.35;cursor:not-allowed}
+.budget{display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px;font-size:15px;margin-bottom:4px}
+.budget b{font-family:var(--title);font-size:20px;color:var(--gold)}
+
+.scale{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;text-align:center}
+.scale .lbl{color:var(--muted);font-size:15px}
+.scale .read{font-family:var(--title);font-weight:800;font-size:46px;line-height:1.1;margin:4px 0;font-variant-numeric:tabular-nums}
+.scale .plate{height:10px;border-radius:5px;background:var(--line);margin:8px auto 0;width:70%}
+
+.dtable{width:100%;border-collapse:collapse;font-size:15px;font-variant-numeric:tabular-nums}
+.dtable th,.dtable td{padding:4px 8px;text-align:right;border-bottom:1px solid var(--line)}
+.dtable th{font-weight:700}
+.tablewrap{overflow-x:auto;max-height:340px;overflow-y:auto}
+.mini svg{width:100%;height:auto;display:block}
+svg text{font-family:var(--body);fill:var(--muted);font-size:12px}
+
+/* solver */
+.solver{display:grid;grid-template-columns:minmax(0,0.9fr) minmax(0,1.4fr);gap:18px;align-items:start}
+@media (max-width:860px){.solver{grid-template-columns:1fr}}
+.datacard{position:sticky;top:10px}
+.step{border:1.5px solid var(--line);border-radius:12px;padding:16px;margin:0 0 12px;background:var(--panel)}
+.step.locked{opacity:.45}
+.step.solved{border-color:var(--ok)}
+.step h3{font-size:19px;margin-bottom:4px}
+.grid-in{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin-top:10px}
+.in{display:flex;flex-direction:column;gap:3px;font-size:15px}
+.in span.l{font-weight:600}
+.in input{padding:8px 10px;border:1.5px solid var(--line);border-radius:8px;background:var(--bg);font-variant-numeric:tabular-nums;width:100%}
+.in input.ok{border-color:var(--ok)}
+.in input.no{border-color:var(--bad)}
+.in input:disabled{opacity:.9}
+.hint{font-size:15px;color:var(--muted);margin-top:8px}
+.hint summary{cursor:pointer;font-weight:600;color:var(--ink)}
+.pts{float:right;font-size:14px;color:var(--muted);font-weight:600}
+
+/* summary card */
+.card{max-width:760px;margin:14px auto;background:var(--panel);border:2px solid var(--ink);border-radius:16px;overflow:hidden}
+.card-head{background:var(--night);color:#F3EEE6;padding:18px 22px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:flex-end}
+.card-head h2{font-size:24px}
+.card-head .score{font-family:var(--title);font-weight:800;font-size:40px;color:var(--gold);line-height:1}
+.card-body{padding:18px 22px}
+.card-body h3{font-size:17px;margin:14px 0 6px}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:4px 16px;font-size:15px}
+.kv dt{color:var(--muted)}
+.kv dd{margin:0;font-weight:600}
+.atable{width:100%;border-collapse:collapse;font-size:15px;font-variant-numeric:tabular-nums}
+.atable th,.atable td{padding:6px 8px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
+.atable th:first-child,.atable td:first-child{text-align:left}
+.card-foot{display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;padding:10px 22px;border-top:1px solid var(--line);font-size:13px;color:var(--muted)}
+
+footer.goldbar{position:fixed;left:0;right:0;bottom:0;background:var(--gold);color:#000;padding:8px 22px;padding-bottom:calc(8px + env(safe-area-inset-bottom,0px));display:flex;justify-content:space-between;align-items:center;font-weight:700;font-size:14px;z-index:9}
+footer.goldbar button{background:transparent;border:1px solid #0006;border-radius:6px;padding:2px 10px;font-size:13px;font-weight:600;color:#000}
+.hidden{display:none !important}
+.blank{display:inline-block;width:7em;max-width:100%;border-bottom:2px dotted var(--muted);height:1.1em;vertical-align:-2px}
+.rcode,.rout{font-family:ui-monospace,"Cascadia Mono",Consolas,monospace;font-size:15px;background:color-mix(in srgb,var(--ink) 6%,transparent);border:1px solid var(--line);border-radius:8px;padding:14px 16px;margin:12px 0;overflow-x:auto;line-height:1.7}
+.rout{white-space:pre;margin-top:14px}
+.rrow{padding-left:2.2em;white-space:nowrap}
+.rarg{display:inline-block;min-width:7.5em}
+.rin{font:inherit;width:9em;padding:3px 8px;border:1.5px solid var(--line);border-radius:6px;background:var(--bg)}
+.rin.ok{border-color:var(--ok)}.rin.no{border-color:var(--bad)}
+.pwgrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:8px 0 12px}
+@media (max-width:560px){.pwgrid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.pwgrid>div{border:1px solid var(--line);border-radius:10px;padding:8px 10px}
+.pwnum{font-family:var(--title);font-weight:800;font-size:26px;font-variant-numeric:tabular-nums}
+code{font-family:ui-monospace,"Cascadia Mono",Consolas,monospace;font-size:.92em;background:color-mix(in srgb,var(--ink) 8%,transparent);padding:1px 5px;border-radius:4px}
+.vtable{width:100%;border-collapse:collapse;font-size:14px}
+.vtable td{padding:4px 6px;border-bottom:1px solid var(--line);vertical-align:middle}
+.vtable td.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.chip{border:1.5px solid var(--line);background:var(--bg);border-radius:6px;padding:2px 8px;font-family:ui-monospace,"Cascadia Mono",Consolas,monospace;font-size:14px;font-weight:600;white-space:nowrap}
+.chip:hover{border-color:var(--gold)}
+.fin{display:block;margin:12px 0}
+.fin .l{display:block;font-weight:600;font-size:15px;margin-bottom:4px}
+.frow{display:flex;align-items:center;gap:8px}
+.frow .eq{font-family:ui-monospace,"Cascadia Mono",Consolas,monospace;font-size:15px;white-space:nowrap;color:var(--muted)}
+.frow input{flex:1;min-width:0;padding:9px 11px;border:1.5px solid var(--line);border-radius:8px;background:var(--bg);font-family:ui-monospace,"Cascadia Mono",Consolas,monospace;font-size:15px}
+.frow input.ok{border-color:var(--ok)}
+.frow input.no{border-color:var(--bad)}
+.preview{display:block;min-height:1.4em;font-size:15px;font-variant-numeric:tabular-nums;margin-top:3px;padding-left:2px}
+.perr{color:var(--bad)}
+@media (prefers-reduced-motion: reduce){.belt{animation:none}.bag{transition:none}}
+</style>
+</head>
+<body>
+<header class="top wrap">
+  <div class="brand"><h1>The Case of the Light Candy Bags</h1><span class="co">Online version</span></div>
+  <nav aria-label="Investigation steps"><ul class="stepper" id="stepper"></ul></nav>
+</header>
+<main class="wrap" id="main"></main>
+<footer class="goldbar"><span id="footLabel">ISE 8110 Design of Experiments</span><button id="btnRestart">Start over</button></footer>
+
+<script>
+(function(){
+/* ================= settings ================= */
+const TRUE_MEANS=[250.0,251.0,245.0];   // hidden truth, same for every group
+const SIGMA=3.0;                         // bag-to-bag variation (g)
+const PER=4, BUDGET=3*PER, MIN_PER=PER;
+const FCRIT_TABLE=4.26;   // F(0.05; 2, 9) from the F table
+const M=['A','B','C'], MV=['var(--mA)','var(--mB)','var(--mC)'];
+const STAGES=['Briefing','Hypotheses','Collect samples','ANOVA solver','Recommendation','Summary card'];
+const INSTRUCTOR=window.__INSTRUCTOR===true||/[?&]instructor(=|&|$)/.test(location.search);
+const KEY='light-candy-online-v1'+(INSTRUCTOR?'-instructor':'');
+try{localStorage.removeItem('spooky-sweets-anova-v1');}catch(e){}
+
+const fresh=()=>({group:'',members:'',stage:0,reached:0,startedAt:null,finishedAt:null,
+  hyp:{h0:null,h1:null,pred:null,checks:0,done:false,pts:0},
+  samples:[],locked:false,
+  solver:{step:0,inputs:{},checks:[0,0,0,0,0],pts:[0,0,0,0,0]},
+  dec:{choice:null,checks:0,done:false,pts:0},
+  rec:{choice:null,checks:0,done:false,pts:0},
+  truthShown:false});
+let S=fresh();
+try{const r=localStorage.getItem(KEY);if(r){const o=JSON.parse(r);if(o&&o.hyp&&o.solver)S=Object.assign(fresh(),o);}}catch(e){}
+/* discard saved data that does not match the balanced design (n per machine) */
+(function(){const c=[0,0,0];(S.samples||[]).forEach(x=>c[x.m]++);if(c.some(x=>x>PER)||(S.locked&&c.some(x=>x!==PER))){const g=S.group,m=S.members;S=fresh();S.group=g;S.members=m;}})();
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
+
+const $=id=>document.getElementById(id);
+const main=$('main');
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const pointsFor=checks=>Math.max(4,10-2*(checks-1));
+
+/* ================= statistics ================= */
+function randn(){let u=0,v=0;while(!u)u=Math.random();while(!v)v=Math.random();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);}
+function stats(){
+  const g=[[],[],[]];S.samples.forEach(s=>g[s.m].push(s.w));
+  const n=g.map(a=>a.length),N=n[0]+n[1]+n[2],a=3;
+  const means=g.map(x=>x.length?x.reduce((p,q)=>p+q,0)/x.length:NaN);
+  const GM=N?S.samples.reduce((p,s)=>p+s.w,0)/N:NaN;
+  let sstr=0,sse=0,sst=0;
+  g.forEach((x,i)=>{sstr+=x.length*(means[i]-GM)**2;x.forEach(v=>{sse+=(v-means[i])**2;sst+=(v-GM)**2;});});
+  const tot=g.map(x=>x.reduce((p,q)=>p+q,0)),sq=g.map(x=>x.reduce((p,q)=>p+q*q,0));
+  const totAll=tot[0]+tot[1]+tot[2],sqAll=sq[0]+sq[1]+sq[2];
+  const ssMach=g.map((x,i)=>x.reduce((p,q)=>p+(q-means[i])**2,0));
+  const dftr=a-1,dfe=N-a,dft=N-1,mstr=sstr/dftr,mse=sse/dfe,F=mstr/mse;
+  const fcrit=fCrit(dftr,dfe,0.05),p=fTail(F,dftr,dfe);
+  return {g,n,N,means,GM,sstr,sse,sst,dftr,dfe,dft,mstr,mse,F,fcrit,p,tot,sq,totAll,sqAll,ssMach};
+}
+function lgamma(z){const c=[76.18009172947146,-86.50532032941677,24.01409824083091,-1.231739572450155,0.1208650973866179e-2,-0.5395239384953e-5];let x=z,y=z,t=x+5.5;t-=(x+0.5)*Math.log(t);let s=1.000000000190015;for(let j=0;j<6;j++)s+=c[j]/++y;return -t+Math.log(2.5066282746310005*s/x);}
+function betacf(a,b,x){const MAXIT=300,EPS=3e-14,FP=1e-300;let qab=a+b,qap=a+1,qam=a-1,c=1,d=1-qab*x/qap;if(Math.abs(d)<FP)d=FP;d=1/d;let h=d;for(let m=1;m<=MAXIT;m++){const m2=2*m;let aa=m*(b-m)*x/((qam+m2)*(a+m2));d=1+aa*d;if(Math.abs(d)<FP)d=FP;c=1+aa/c;if(Math.abs(c)<FP)c=FP;d=1/d;h*=d*c;aa=-(a+m)*(qab+m)*x/((a+m2)*(qap+m2));d=1+aa*d;if(Math.abs(d)<FP)d=FP;c=1+aa/c;if(Math.abs(c)<FP)c=FP;d=1/d;const del=d*c;h*=del;if(Math.abs(del-1)<EPS)break;}return h;}
+function ibeta(x,a,b){if(x<=0)return 0;if(x>=1)return 1;const bt=Math.exp(lgamma(a+b)-lgamma(a)-lgamma(b)+a*Math.log(x)+b*Math.log(1-x));return x<(a+1)/(a+b+2)?bt*betacf(a,b,x)/a:1-bt*betacf(b,a,1-x)/b;}
+function fTail(F,d1,d2){if(!(F>0))return 1;return ibeta(d2/(d2+d1*F),d2/2,d1/2);}
+function fCrit(d1,d2,al){let lo=0,hi=1000;for(let i=0;i<100;i++){const m=(lo+hi)/2;if(fTail(m,d1,d2)>al)lo=m;else hi=m;}return (lo+hi)/2;}
+const r2=v=>(Math.round(v*100)/100).toFixed(2);
+const r1=v=>(Math.round(v*10)/10).toFixed(1);
+const pText=p=>p<0.001?'p < 0.001':'p = '+p.toFixed(3);
+
+/* ================= stepper ================= */
+function ensureDemo(){
+  if(!S.group)S.group='Instructor demo';
+  if(!S.locked){
+    const c=[0,0,0];S.samples.forEach(x=>c[x.m]++);
+    for(let i=0;i<3;i++)while(c[i]<PER){S.samples.push({m:i,w:Math.round((TRUE_MEANS[i]+SIGMA*randn())*10)/10});c[i]++;}
+    S.locked=true;if(S.hyp.pred===null)S.hyp.pred=2;
+  }
+  if(!S.hyp.done){S.hyp.h0=0;S.hyp.h1=1;S.hyp.done=true;}
+  save();
+}
+function ensureDecision(){ensureDemo();if(!S.dec.done){S.dec.choice=stats().F>FCRIT_TABLE?0:1;S.dec.done=true;save();}}
+function ensureRec(){ensureDecision();if(!S.rec.done){const i=S.dec.choice===0?0:1;S.rec.choice=i;S.rec.text=recOptions()[i].t;S.rec.done=true;if(!S.finishedAt)S.finishedAt=Date.now();save();}}
+function renderStepper(){
+  $('stepper').innerHTML=STAGES.map((s,i)=>`<li><button data-i="${i}" ${!INSTRUCTOR&&i>S.reached?'disabled':''} class="${i<S.reached?'done':''}" aria-current="${i===S.stage?'step':'false'}">${i+1} ${s}</button></li>`).join('');
+  $('stepper').querySelectorAll('button').forEach(b=>b.onclick=()=>go(+b.dataset.i));
+}
+function go(i){
+  stopFactory();
+  S.stage=i;S.reached=Math.max(S.reached,i);save();
+  renderStepper();
+  [renderBriefing,renderHyp,renderSampling,renderSolver,renderRec,renderSummary][i]();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+/* ================= 1. briefing ================= */
+function renderBriefing(){
+  main.innerHTML=`<section class="panel">
+  <h2>A complaint from the candy aisle</h2>
+  <div class="memo">
+    <p class="from">Message from the Plant Manager</p>
+    <p>Our biggest retailer says some of our 250 g Halloween candy bags feel light. We fill bags on three machines: A, B, and C. Before I pay a technician to recalibrate anything, I need an answer to one question: do the three machines fill the same average weight?</p>
+    <p>Pull sample bags from each line, run a one-way ANOVA, and send me your recommendation.</p>
+  </div>
+  <h3>What you will do</h3>
+  <ol class="plan">
+    <li>Write the hypotheses you are testing.</li>
+    <li>Pull ${PER} bags off each machine's conveyor and weigh them.</li>
+    <li>Read your plot and decide which machine looks off.</li>
+    <li>Build the ANOVA in the solver by typing the formula for each quantity, the same formulas we used in class. The solver does the arithmetic and checks your work step by step.</li>
+    <li>Make a recommendation to the plant manager.</li>
+    <li>Share your summary card.</li>
+  </ol>
+  <div class="callout">Every student samples from the same factory, but each of you pulls your own random bags, so your numbers will differ from your classmates\u2019. At the end you can see what happens with larger samples.</div>
+  <div class="field"><label for="gname">Your first name</label><input id="gname" maxlength="60" value="${esc(S.group)}" placeholder="First name" autocomplete="given-name"></div>
+  <div class="actions"><button class="btn" id="btnGo" ${S.group.trim()?'':'disabled'}>Start the investigation</button></div>
+  </section>`;
+  const upd=()=>{S.group=$('gname').value;S.members='';save();$('btnGo').disabled=!S.group.trim();};
+  $('gname').oninput=upd;
+  $('btnGo').onclick=()=>{if(!S.startedAt)S.startedAt=Date.now();go(1);};
+}
+
+/* ================= 2. hypotheses ================= */
+const H0=[
+  {t:'μA = μB = μC. The three machines fill the same average weight.',ok:true,why:'Correct. The null hypothesis is about the true machine averages, and it says they are all equal.'},
+  {t:'Every bag weighs exactly 250 g.',ok:false,why:'Individual bags always vary. ANOVA tests machine averages, not single bags.'},
+  {t:'ȳA = ȳB = ȳC. The sample averages are equal.',ok:false,why:'Hypotheses are about true averages (μ), not the sample averages you will calculate. Sample averages almost never match exactly.'},
+  {t:'At least one machine fills a different average weight.',ok:false,why:'That is the alternative hypothesis, not the null.'}
+];
+const H1=[
+  {t:'μA ≠ μB ≠ μC. Every machine differs from every other machine.',ok:false,why:'Too strong. ANOVA rejects the null if even one machine differs, so the alternative does not require all of them to differ.'},
+  {t:'At least one machine fills a different average weight from the others.',ok:true,why:'Correct. The alternative only needs one true average to be different.'},
+  {t:'Machine C fills less than 250 g.',ok:false,why:'This names one machine in advance. One-way ANOVA compares all machine averages at once.'},
+  {t:'The sample averages are not equal.',ok:false,why:'Hypotheses are about true averages (μ). Sample averages will almost always differ a little.'}
+];
+function renderHyp(){
+  const h=S.hyp,lock=h.done;
+  const opt=(arr,name,sel)=>arr.map((o,i)=>{
+    let cls='';if(h.checks&&sel===i)cls=o.ok?'right':'wrong';if(lock&&o.ok)cls='right';
+    const why=(h.checks&&sel===i)?`<div class="why">${o.why}</div>`:'';
+    return `<label class="choice ${cls}"><input type="radio" name="${name}" value="${i}" ${sel===i?'checked':''} ${lock?'disabled':''}><span>${o.t}${why}</span></label>`;}).join('');
+  main.innerHTML=`<section class="panel">
+  <h2>Set up the test</h2>
+  <p>Let μA, μB, and μC be the true average fill weights of Machines A, B, and C. Pick the correct pair of hypotheses.</p>
+  <fieldset><legend>Null hypothesis (H₀)</legend>${opt(H0,'h0',h.h0)}</fieldset>
+  <fieldset><legend>Alternative hypothesis (H₁)</legend>${opt(H1,'h1',h.h1)}</fieldset>
+  <div class="actions">${lock?`<span class="feedback ok">Both correct. ${h.pts} of 10 points.</span><button class="btn" id="btnToSamp">Go to the factory floor</button>`:`<button class="btn" id="btnCheckH">Check hypotheses</button><span id="fbH" class="feedback"></span>`}</div>
+  </section>`;
+  main.querySelectorAll('input[name=h0]').forEach(r=>r.onchange=()=>{h.h0=+r.value;save();});
+  main.querySelectorAll('input[name=h1]').forEach(r=>r.onchange=()=>{h.h1=+r.value;save();});
+  if(!lock)$('btnCheckH').onclick=()=>{
+    if(h.h0===null||h.h1===null){$('fbH').className='feedback no';$('fbH').textContent='Pick one option in each list first.';return;}
+    h.checks++;
+    if(H0[h.h0].ok&&H1[h.h1].ok){h.done=true;h.pts=pointsFor(h.checks);}
+    save();renderHyp();
+    if(!h.done){$('fbH').className='feedback no';$('fbH').textContent='Not yet. Read the note under each red choice and try again.';}
+  };
+  else $('btnToSamp').onclick=()=>go(2);
+}
+
+/* ================= 3. sampling ================= */
+let raf=null,lanes=[],lastT=0;
+function stopFactory(){if(raf)cancelAnimationFrame(raf);raf=null;lanes=[];}
+function bagSVG(i){
+  return `<svg viewBox="0 0 50 62" aria-hidden="true"><path d="M17 4 L25 10 L33 4 L31 12 L19 12 Z" fill="${MV[i]}" opacity=".8"/><path d="M12 13 Q25 9 38 13 L44 54 Q25 62 6 54 Z" fill="${MV[i]}"/><circle cx="19" cy="32" r="3.2" fill="#1C1626"/><circle cx="31" cy="32" r="3.2" fill="#1C1626"/><path d="M19 42 Q25 47 31 42" stroke="#1C1626" stroke-width="2.4" fill="none" stroke-linecap="round"/><text x="25" y="24" text-anchor="middle" style="font-size:8px;font-weight:700;fill:#1C1626">250 g</text></svg>`;
+}
+function renderSampling(){
+  const st=stats(),left=BUDGET-S.samples.length,lock=S.locked;
+  const ready=st.n.every(x=>x>=MIN_PER);
+  main.innerHTML=`<section class="panel">
+  <h2>Factory floor</h2>
+  <p>Click a bag on any conveyor to pull it off the line and weigh it. Pull ${PER} bags from each machine, ${BUDGET} in total. Bags you miss ship to stores, and another one will come along.</p>
+  ${lock?'<div class="callout">Your samples are locked because you have started the analysis.</div>':''}
+  <div class="factory">
+    <div class="floor">
+      <div class="budget"><span>Bags left to pull: <b id="left">${left}</b></span><span id="needs">${needText(st)}</span></div>
+      ${M.map((m,i)=>`<div class="lane"><div class="lane-head"><span><span class="mdot" style="background:${MV[i]}"></span><strong>Machine ${m}</strong> <span id="cnt${i}">${st.n[i]} of ${PER}</span></span><button class="pull" data-m="${i}" ${lock||st.n[i]>=PER?'disabled':''}>Pull next bag</button></div><div class="belt ${st.n[i]>=PER?'full':''}" id="belt${i}"><div class="machine-box" style="--mc:${MV[i]}">${m}</div></div></div>`).join('')}
+    </div>
+    <div>
+      <div class="scale" aria-live="polite"><div class="lbl" id="scaleLbl">Scale is empty</div><div class="read" id="scaleRead">0.0 g</div><div class="plate"></div></div>
+      <div class="panel" style="margin-top:14px;padding:16px">
+        <h3>Your data</h3>
+        <div class="mini" id="mini"></div>
+        <div class="tablewrap" id="dtable"></div>
+      </div>
+    </div>
+  </div>
+  <div class="panel ${ready||lock?'':'hidden'}" id="predBox" style="margin:16px 0 0;padding:18px">
+    <h3>What does your plot suggest?</h3>
+    <p>Look at your dot plot. Which machine looks off to you? This is not graded. It goes on your summary card, and the ANOVA will tell you whether the pattern holds up.</p>
+    <div>${PREDS.map((t,i)=>`<label class="choice"><input type="radio" name="pred" value="${i}" ${S.hyp.pred===i?'checked':''} ${lock?'disabled':''}><span>${t}</span></label>`).join('')}</div>
+  </div>
+  <div class="actions">
+    ${lock?'<button class="btn" id="btnNext">Back to the solver</button>':`<button class="btn" id="btnNext" disabled>Lock my samples and start the analysis</button><span class="muted" id="lockNote"></span>`}
+  </div></section>`;
+  updLock();
+  drawData();
+  main.querySelectorAll('.pull').forEach(b=>b.onclick=()=>pullBag(+b.dataset.m,null));
+  main.querySelectorAll('input[name=pred]').forEach(r=>r.onchange=()=>{S.hyp.pred=+r.value;save();updLock();});
+  $('btnNext').onclick=()=>{
+    if(lock){go(3);return;}
+    if(!stats().n.every(x=>x>=MIN_PER)||S.hyp.pred===null)return;
+    S.locked=true;save();go(3);
+  };
+  if(!lock&&left>0)startFactory();
+}
+const PREDS=['Machine A','Machine B','Machine C','None of them, they look about the same'];
+function updLock(){
+  if(S.locked)return;
+  const ready=stats().n.every(x=>x>=MIN_PER);
+  $('predBox').classList.toggle('hidden',!ready);
+  $('btnNext').disabled=!(ready&&S.hyp.pred!==null);
+  $('lockNote').textContent=!ready?'':S.hyp.pred===null?'Answer the plot question above first.':'After this, you cannot pull more bags.';
+}
+function needText(st){
+  const miss=st.n.map((x,i)=>x<PER?`${PER-x} more from ${M[i]}`:null).filter(Boolean);
+  return miss.length?'Still need: '+miss.join(', '):'All machines sampled';
+}
+function startFactory(){
+  lanes=[0,1,2].map(i=>({i,el:$('belt'+i),bags:[],speed:0,next:performance.now()+300+i*450}));
+  lastT=performance.now();
+  const tick=t=>{
+    const dt=Math.min(0.05,(t-lastT)/1000);lastT=t;
+    const left=BUDGET-S.samples.length;
+    lanes.forEach(L=>{
+      const W=L.el.clientWidth;L.speed=W/(6.5+L.i*0.6);
+      if(left>0&&t>=L.next&&stats().n[L.i]<PER){spawnBag(L);L.next=t+1100+Math.random()*900;}
+      L.bags=L.bags.filter(b=>{
+        if(b.gone)return false;
+        b.x+=L.speed*dt;
+        if(b.x>W){b.el.remove();return false;}
+        b.el.style.transform=`translateX(${b.x}px)`;return true;
+      });
+    });
+    raf=requestAnimationFrame(tick);
+  };
+  raf=requestAnimationFrame(tick);
+}
+function spawnBag(L){
+  const b={x:20,gone:false};
+  const el=document.createElement('button');
+  el.className='bag';el.setAttribute('aria-label','Pull this bag from Machine '+M[L.i]);
+  el.innerHTML=bagSVG(L.i);el.style.transform=`translateX(${b.x}px)`;
+  el.onclick=()=>pullBag(L.i,b);
+  b.el=el;L.el.appendChild(el);L.bags.push(b);
+}
+function pullBag(i,b){
+  if(S.locked||S.samples.length>=BUDGET||stats().n[i]>=PER)return;
+  if(b){if(b.gone)return;b.gone=true;b.el.classList.add('picked');const e=b.el;setTimeout(()=>e.remove(),350);}
+  const w=Math.round((TRUE_MEANS[i]+SIGMA*randn())*10)/10;
+  S.samples.push({m:i,w});save();
+  // scale
+  $('scaleLbl').innerHTML=`<span class="mdot" style="background:${MV[i]}"></span>Bag from Machine ${M[i]}`;
+  const start=performance.now(),el=$('scaleRead');
+  const anim=t=>{const k=Math.min(1,(t-start)/450);el.textContent=(w*(1-Math.pow(1-k,3))).toFixed(1)+' g';if(k<1)requestAnimationFrame(anim);};
+  requestAnimationFrame(anim);
+  // counts
+  const st=stats(),left=BUDGET-S.samples.length;
+  $('left').textContent=left;$('needs').textContent=needText(st);
+  [0,1,2].forEach(k=>{$('cnt'+k).textContent=st.n[k]+' of '+PER;if(st.n[k]>=PER){main.querySelector(`.pull[data-m="${k}"]`).disabled=true;$('belt'+k).classList.add('full');}});
+  updLock();
+  drawData();
+}
+function dataTableHTML(){
+  const st=stats(),rows=Math.max(...st.n,0);
+  let h=`<table class="dtable"><thead><tr><th>#</th>${M.map((m,i)=>`<th><span class="mdot" style="background:${MV[i]}"></span>${m}</th>`).join('')}</tr></thead><tbody>`;
+  for(let r=0;r<rows;r++)h+=`<tr><td class="muted">${r+1}</td>${[0,1,2].map(i=>`<td>${st.g[i][r]!==undefined?st.g[i][r].toFixed(1):''}</td>`).join('')}</tr>`;
+  h+=`<tr><th>n</th>${st.n.map(x=>`<th>${x}</th>`).join('')}</tr></tbody></table>`;
+  return rows?h:'<p class="muted">No bags weighed yet.</p>';
+}
+function miniPlot(){
+  const W=360,H=170,ml=40,mr=10,mt=10,mb=26;
+  if(!S.samples.length)return '';
+  const ws=S.samples.map(s=>s.w);let lo=Math.floor(Math.min(...ws,244)/2)*2-2,hi=Math.ceil(Math.max(...ws,256)/2)*2+2;
+  const y=v=>mt+(hi-v)/(hi-lo)*(H-mt-mb),x=i=>ml+(i+0.5)*(W-ml-mr)/3;
+  let s='';
+  for(let v=Math.ceil(lo/4)*4;v<=hi;v+=4)s+=`<line x1="${ml}" x2="${W-mr}" y1="${y(v)}" y2="${y(v)}" style="stroke:var(--line)"/><text x="${ml-6}" y="${y(v)+4}" text-anchor="end">${v}</text>`;
+  s+=`<line x1="${ml}" x2="${W-mr}" y1="${y(250)}" y2="${y(250)}" style="stroke:var(--gold);stroke-width:2;stroke-dasharray:5 4"/><text x="${W-mr}" y="${y(250)-4}" text-anchor="end">label 250 g</text>`;
+  S.samples.forEach((p,k)=>{const j=((k*37)%11-5)*3.2;s+=`<circle cx="${x(p.m)+j}" cy="${y(p.w)}" r="4.5" style="fill:${MV[p.m]};opacity:.85"/>`;});
+  M.forEach((m,i)=>s+=`<text x="${x(i)}" y="${H-6}" text-anchor="middle" style="fill:var(--ink);font-weight:700">Machine ${m}</text>`);
+  return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Bag weights by machine">${s}</svg>`;
+}
+function drawData(){$('mini').innerHTML=miniPlot();$('dtable').innerHTML=dataTableHTML();}
+
+/* ================= 4. solver ================= */
+const STEPS=[
+  {title:'Step 1. Averages',fields:[['yA','Machine A mean, ȳA.','ybarA'],['yB','Machine B mean, ȳB.','ybarB'],['yC','Machine C mean, ȳC.','ybarC'],['yy','Overall mean, ȳ..','ybarAll']],
+   hint:'ȳᵢ. = yᵢ. ÷ n, where yᵢ. is the total for machine i.<br>ȳ.. = y.. ÷ N, where y.. is the total of all bags.',
+   truth:s=>({yA:s.means[0],yB:s.means[1],yC:s.means[2],yy:s.GM}),tol:()=>[0,0.06]},
+  {title:'Step 2. Sums of squares',fields:[['sstr','SS Treatments (between machines)','SSTr'],['sst','SS Total','SST'],['sse','SS Error (within machines)','SSE']],
+   hint:'The formulas from class:<br>SS<sub>Treatments</sub> = n Σᵢ (ȳᵢ. − ȳ..)²<br>SS<sub>T</sub> = Σᵢ Σⱼ (yᵢⱼ − ȳ..)²<br>SS<sub>E</sub> = SS<sub>T</sub> − SS<sub>Treatments</sub><br><br>How to type a Σ: <code>sumi( )</code> adds what is inside over the 3 machines, and inside it <code>ybari</code> stands for ȳᵢ.. <code>sumij( )</code> adds what is inside over every bag, and inside it <code>yij</code> stands for that bag\'s weight. Type a square with <code>^2</code>. Inside this step, you can use <code>SSTr</code> and <code>SST</code> once you have typed them above.',
+   truth:s=>({sstr:s.sstr,sst:s.sst,sse:s.sse}),tol:()=>[0.01,0.5]},
+  {title:'Step 3. Degrees of freedom',fields:[['dftr','df Treatments','dfTr'],['dfe','df Error','dfE'],['dft','df Total','dfT']],
+   hint:'df Treatments = a − 1, df Error = N − a, df Total = N − 1.',
+   truth:s=>({dftr:s.dftr,dfe:s.dfe,dft:s.dft}),tol:()=>[0,0.001]},
+  {title:'Step 4. Mean squares',fields:[['mstr','MS Treatments','MSTr'],['mse','MS Error','MSE']],
+   hint:'MS Treatments = SS Treatments ÷ df Treatments<br>MS Error = SS Error ÷ df Error',
+   truth:s=>({mstr:s.mstr,mse:s.mse}),tol:()=>[0.01,0.05]},
+  {title:'Step 5. Test statistic',fields:[['f0','F₀','F0']],
+   hint:'F₀ = MS Treatments ÷ MS Error.',
+   note:'The critical value is given: F₀.₀₅, 2, '+(3*PER-3)+' = '+FCRIT_TABLE.toFixed(2)+'. You will compare F₀ with it in Step 6.',
+   truth:s=>({f0:s.F}),tol:()=>[0.02,0.02]}
+];
+const VAR_INFO=[
+  ['a','number of machines'],['n','bags per machine'],['N','total bags, a × n'],
+  ['Fcrit','F₀.₀₅, 2, '+(3*PER-3)+' from the F table (given)'],['totA','yA., total of Machine A weights'],['totB','yB., total of Machine B weights'],['totC','yC., total of Machine C weights'],['totAll','y.., total of all weights']
+];
+const TOOLS=[
+  ['sumi()','Σᵢ, adds over the 3 machines',6],['ybari','ȳᵢ., the machine mean, used inside sumi( )',0],
+  ['sumij()','Σᵢ Σⱼ, adds over every bag',6],['yij','yᵢⱼ, one bag\'s weight, used inside sumij( )',0]
+];
+function closeEnough(v,t,[rel,abs]){return Math.abs(v-t)<=Math.max(abs,rel*Math.abs(t));}
+
+/* safe formula evaluator: numbers, names, + - * / ^ ( ), sumi(), sumij(), sqrt(), abs() */
+function compileExpr(src){
+  const s=String(src??'').replace(/[×·]/g,'*').replace(/÷/g,'/').replace(/²/g,'^2').replace(/[−–]/g,'-').replace(/Σ/g,'').replace(/,/g,'');
+  if(!s.trim())throw new Error('Type a formula.');
+  const toks=[];const re=/\s*(?:(\d*\.?\d+(?:[eE][+-]?\d+)?)|([A-Za-z_][A-Za-z_0-9]*)|(\S))/g;let m;
+  while((m=re.exec(s))!==null){
+    if(m[1]!==undefined)toks.push({t:'n',v:parseFloat(m[1])});
+    else if(m[2]!==undefined)toks.push({t:'id',v:m[2]});
+    else{if(!'+-*/^()'.includes(m[3]))throw new Error(`The symbol "${m[3]}" is not allowed here.`);toks.push({t:'op',v:m[3]});}
+  }
+  let i=0;const pk=()=>toks[i],isOp=c=>toks[i]&&toks[i].t==='op'&&toks[i].v===c;
+  const noImplicit=()=>{if(pk()&&(pk().t==='id'||pk().t==='n'||isOp('(')))throw new Error('Use * to multiply.');};
+  function expr(){let f=term();while(isOp('+')||isOp('-')){const o=toks[i++].v,a=f,b=term();f=o==='+'?e=>a(e)+b(e):e=>a(e)-b(e);}return f;}
+  function term(){let f=unary();while(isOp('*')||isOp('/')){const o=toks[i++].v,a=f,b=unary();f=o==='*'?e=>a(e)*b(e):e=>a(e)/b(e);}return f;}
+  function unary(){if(isOp('-')){i++;const a=unary();return e=>-a(e);}if(isOp('+')){i++;return unary();}return power();}
+  function power(){const b=primary();if(isOp('^')){i++;const x=unary();return e=>Math.pow(b(e),x(e));}return b;}
+  function primary(){
+    const t=pk();if(!t)throw new Error('The formula ends too early.');
+    if(t.t==='n'){i++;noImplicit();return ()=>t.v;}
+    if(t.t==='id'){
+      i++;const nm=t.v.toLowerCase();
+      if(['sqrt','abs','sumi','sumij'].includes(nm)){
+        if(!isOp('('))throw new Error(`${t.v} needs parentheses, like ${t.v}( ).`);
+        i++;const f=expr();if(!isOp(')'))throw new Error('Missing a closing parenthesis.');i++;noImplicit();
+        if(nm==='sqrt')return e=>Math.sqrt(f(e));
+        if(nm==='abs')return e=>Math.abs(f(e));
+        if(nm==='sumi')return e=>{let t=0;for(let k=0;k<3;k++)t+=f(Object.assign({},e,{ybari:e.__means[k],__ini:true}));return t;};
+        return e=>{let t=0;for(const b of e.__bags)t+=f(Object.assign({},e,{yij:b.w,ybari:e.__means[b.m],__inij:true}));return t;};
+      }
+      noImplicit();
+      return e=>{
+        if(nm==='yij'&&!e.__inij)throw new Error('yij only works inside sumij( ).');
+        if(nm==='ybari'&&!e.__ini&&!e.__inij)throw new Error('ybari only works inside sumi( ).');
+        if(t.v in e)return e[t.v];
+        if(nm in e.__low)return e[e.__low[nm]];
+        throw new Error(`"${t.v}" is not a name you can use yet.`);
+      };
+    }
+    if(isOp('(')){i++;const f=expr();if(!isOp(')'))throw new Error('Missing a closing parenthesis.');i++;noImplicit();return f;}
+    throw new Error(`Check the formula near "${t.v}".`);
+  }
+  const f=expr();
+  if(i<toks.length)throw new Error(`Check the formula near "${toks[i].v}".`);
+  return f;
+}
+function evalExpr(src,vars){
+  const f=compileExpr(src),st=stats();
+  const env={__bags:S.samples,__means:st.means,__low:{yij:'yij',ybari:'ybari'}};
+  for(const k in vars){env[k]=vars[k];const l=k.toLowerCase();if(!(l in env.__low))env.__low[l]=k;}
+  const v=f(env);
+  if(!isFinite(v))throw new Error('The result is not a number. Check for division by zero.');
+  return v;
+}
+function baseVars(st){
+  const v={a:3,n:PER,N:st.N,Fcrit:FCRIT_TABLE,totA:st.tot[0],totB:st.tot[1],totC:st.tot[2],totAll:st.totAll};
+  for(let k=0;k<S.solver.step&&k<STEPS.length;k++){const tr=STEPS[k].truth(st);STEPS[k].fields.forEach(([key,,nm])=>v[nm]=tr[key]);}
+  return v;
+}
+function evalStep(k,st){
+  const v=baseVars(st),out={};
+  STEPS[k].fields.forEach(([key,,nm])=>{
+    try{const val=evalExpr(S.solver.inputs[key],v);out[key]={val};v[nm]=val;}
+    catch(e){out[key]={err:e.message};}
+  });
+  return out;
+}
+const fmt=x=>Math.abs(x)>=1000?x.toFixed(2):(Math.round(x*10000)/10000).toString();
+let lastInput=null;
+function renderSolver(){
+  if(INSTRUCTOR&&!S.locked)ensureDemo();
+  if(!S.locked){main.innerHTML=`<section class="panel"><h2>ANOVA solver</h2><p>Lock your samples on the factory floor first.</p><div class="actions"><button class="btn" id="b">Go to the factory floor</button></div></section>`;$('b').onclick=()=>go(2);return;}
+  const st=stats(),sv=S.solver,bv=baseVars(st);
+  const unlocked=[];for(let k=0;k<sv.step&&k<STEPS.length;k++)STEPS[k].fields.forEach(([,lab,nm])=>unlocked.push([nm,lab]));
+  const varRows=[...VAR_INFO,...unlocked].map(([nm,lab])=>`<tr><td><button class="chip" data-ins="${nm}" title="Insert ${nm}">${nm}</button></td><td class="muted">${lab}</td><td class="num">${fmt(bv[nm])}</td></tr>`).join('');
+  const toolRows=TOOLS.map(([nm,lab,back])=>`<tr><td><button class="chip" data-ins="${nm}" data-back="${back?1:0}" title="Insert ${nm}">${nm}</button></td><td class="muted" colspan="2">${lab}</td></tr>`).join('');
+  let steps='';
+  STEPS.forEach((d,k)=>{
+    const locked=k>sv.step,solved=k<sv.step,tr=d.truth(st);
+    const ev=locked?{}:evalStep(k,st);
+    steps+=`<div class="step ${locked?'locked':''} ${solved?'solved':''}">
+      <h3>${d.title}${solved?`<span class="pts">${sv.pts[k]} of 10 points</span>`:''}</h3>
+      ${d.fields.map(([key,lab,nm])=>{
+        const val=sv.inputs[key]??'';const r=ev[key]||{};let cls='';
+        if(solved)cls='ok';else if(sv.checks[k]&&r.val!==undefined)cls=closeEnough(r.val,tr[key],d.tol(key))?'ok':'no';
+        const prev=locked?'':(val===''?'':r.err?`<span class="perr">${esc(r.err)}</span>`:`= ${fmt(r.val)}`);
+        return `<label class="fin"><span class="l">${lab} <code>${nm}</code></span><span class="frow"><span class="eq">${nm} =</span><input data-k="${key}" data-step="${k}" value="${esc(val)}" class="${cls}" ${locked||solved?'disabled':''} spellcheck="false" autocomplete="off" placeholder="${locked?'':'type a formula'}"></span><span class="preview" id="pv_${key}">${prev}</span></label>`;}).join('')}
+      ${!locked&&d.note?`<div class="callout" style="margin:10px 0 0">${d.note}</div>`:''}
+      ${locked?'':`<details class="hint" ${solved?'':'open'}><summary>Formula help</summary><p>${d.hint}</p></details>`}
+      ${!locked&&!solved?`<div class="actions"><button class="btn small" data-check="${k}">Check step ${k+1}</button><span class="feedback" id="fb${k}"></span></div>`:''}
+    </div>`;
+  });
+  const decOpen=sv.step>=STEPS.length,dc=S.dec;
+  const reject=st.F>FCRIT_TABLE;
+  steps+=`<div class="step ${decOpen?'':'locked'} ${dc.done?'solved':''}">
+    <h3>Step 6. Decision at α = 0.05${dc.done?`<span class="pts">${dc.pts} of 10 points</span>`:''}</h3>
+    ${['Reject H₀. There is evidence that at least one machine fills a different average weight.','Fail to reject H₀. There is not enough evidence that the machine averages differ.'].map((t,i)=>`<label class="choice ${dc.done&&dc.choice===i?'right':(dc.checks&&dc.choice===i&&!dc.done?'wrong':'')}"><input type="radio" name="dec" value="${i}" ${dc.choice===i?'checked':''} ${!decOpen||dc.done?'disabled':''}><span>${t}</span></label>`).join('')}
+    ${decOpen&&!dc.done?`<div class="actions"><button class="btn small" id="btnDec">Check decision</button><span class="feedback" id="fbDec"></span></div>`:''}
+    ${dc.done?`<div class="callout">The solver's exact p-value is <strong>${pText(st.p)}</strong>. ${reject?'Since p is below 0.05, this agrees with rejecting H₀.':'Since p is above 0.05, this agrees with failing to reject H₀.'}</div><div class="actions"><button class="btn" id="btnToRec">Write the recommendation</button></div>`:''}
+  </div>`;
+  main.innerHTML=`<section class="panel"><h2>ANOVA solver</h2>
+  <p>For each value, type a formula using the names in the variables panel, for example <code>totA / n</code>. The solver calculates the number as you type, so you focus on the formula, not the arithmetic. Click a name in the panel to insert it. Use + − * / ^ and parentheses.</p>
+  <p class="muted">A step unlocks after the one before it is correct, and its results become new names you can use. Each step is worth 10 points, and each extra check costs 2 points.</p></section>
+  <div class="solver">
+    <div class="datacard panel" style="margin-top:0">
+      <h3>Variables</h3>
+      <div class="tablewrap" style="max-height:none"><table class="vtable">${varRows}</table></div>
+      ${sv.step>=1?`<h3 style="margin-top:16px">Sum tools</h3><div class="tablewrap" style="max-height:none"><table class="vtable">${toolRows}</table></div>`:''}
+      <details class="hint"><summary>See the raw bag weights</summary><div class="tablewrap">${dataTableHTML()}</div></details>
+      <div class="actions"><button class="btn ghost small" id="btnBackFloor">View factory floor</button></div>
+    </div>
+    <div>${steps}</div>
+  </div>`;
+  main.querySelectorAll('.step input[data-k]').forEach(inp=>{
+    inp.onfocus=()=>{lastInput=inp;};
+    inp.oninput=()=>{
+      sv.inputs[inp.dataset.k]=inp.value;inp.className='';save();
+      const k=+inp.dataset.step,ev=evalStep(k,stats());
+      STEPS[k].fields.forEach(([key])=>{const p=$('pv_'+key),r=ev[key];if(!p)return;const raw=sv.inputs[key]??'';p.innerHTML=raw===''?'':r.err?`<span class="perr">${esc(r.err)}</span>`:`= ${fmt(r.val)}`;});
+    };
+  });
+  main.querySelectorAll('.chip').forEach(c=>c.onclick=()=>{
+    const inp=lastInput&&document.body.contains(lastInput)&&!lastInput.disabled?lastInput:main.querySelector('.step input[data-k]:not([disabled])');
+    if(!inp)return;
+    const s=inp.selectionStart??inp.value.length,e=inp.selectionEnd??inp.value.length;
+    inp.value=inp.value.slice(0,s)+c.dataset.ins+inp.value.slice(e);
+    const pos=s+c.dataset.ins.length-(c.dataset.back==='1'?1:0);inp.focus();inp.setSelectionRange(pos,pos);
+    inp.dispatchEvent(new Event('input'));
+  });
+  main.querySelectorAll('[data-check]').forEach(b=>b.onclick=()=>checkStep(+b.dataset.check));
+  main.querySelectorAll('input[name=dec]').forEach(r=>r.onchange=()=>{dc.choice=+r.value;save();});
+  if($('btnDec'))$('btnDec').onclick=()=>{
+    if(dc.choice===null){$('fbDec').className='feedback no';$('fbDec').textContent='Pick one option first.';return;}
+    dc.checks++;
+    if((dc.choice===0)===reject){dc.done=true;dc.pts=pointsFor(dc.checks);save();renderSolver();}
+    else{save();renderSolver();$('fbDec').className='feedback no';$('fbDec').textContent='Compare F₀ with F critical. Reject H₀ when F₀ is larger.';}
+  };
+  if($('btnToRec'))$('btnToRec').onclick=()=>go(4);
+  $('btnBackFloor').onclick=()=>go(2);
+}
+function checkStep(k){
+  const st=stats(),sv=S.solver,d=STEPS[k],tr=d.truth(st),ev=evalStep(k,st);
+  const bad=d.fields.find(([key])=>ev[key].err);
+  if(bad){const f=$('fb'+k);f.className='feedback no';f.textContent=`${bad[1]}: ${ev[bad[0]].err}`;return;}
+  sv.checks[k]++;
+  const allOk=d.fields.every(([key])=>closeEnough(ev[key].val,tr[key],d.tol(key)));
+  let msg='';
+  if(allOk){sv.pts[k]=pointsFor(sv.checks[k]);sv.step=k+1;lastInput=null;}
+  else{
+    msg='Red boxes are off. Compare your formula with the formula help and try again.';
+    if(k===1&&!closeEnough(ev.sstr.val,tr.sstr,d.tol()))msg+=' Tip: SS Treatments compares each machine mean with the overall mean, then multiplies by n.';
+    else if(k===1&&!closeEnough(ev.sst.val,tr.sst,d.tol()))msg+=' Tip: SS Total compares every bag with the overall mean, so it needs sumij( ).';
+  }
+  save();renderSolver();
+  if(msg){const f=$('fb'+k);if(f){f.className='feedback no';f.textContent=msg;}}
+}
+
+/* ================= 5. recommendation ================= */
+function recOptions(){
+  const st=stats();const lowI=st.means.indexOf(Math.min(...st.means));const low=M[lowI];
+  return [
+    {t:`The machines do not all fill the same average weight. Machine ${low} has the lowest sample mean, so check it first. A follow-up comparison of the machines would confirm which one differs.`,fits:'reject'},
+    {t:'There is not enough evidence that the machines fill different average weights. Leave the line as is for now, and collect more bags if complaints continue.',fits:'fail'},
+    {t:`Machine ${low} is definitely broken and should be replaced right away.`,fits:'never',why:'ANOVA tells you whether the averages likely differ. It does not prove a machine is broken, and on its own it does not identify which machine differs.'},
+    {t:'Every bag from every machine weighs 250 g, so the retailer is wrong.',fits:'never',why:'Your own data show bag-to-bag variation, so this cannot be true.'}
+  ];
+}
+function renderRec(){
+  if(INSTRUCTOR)ensureDecision();
+  if(!S.dec.done){main.innerHTML=`<section class="panel"><h2>Recommendation</h2><p>Finish the ANOVA solver first.</p><div class="actions"><button class="btn" id="b">Go to the solver</button></div></section>`;$('b').onclick=()=>go(3);return;}
+  const st=stats(),rc=S.rec,opts=recOptions(),reject=S.dec.choice===0;
+  main.innerHTML=`<section class="panel">
+  <h2>Your recommendation to the plant manager</h2>
+  <p>Your test result: <strong>${reject?'Reject H₀':'Fail to reject H₀'}</strong> (F₀ = ${r2(st.F)}, F critical = ${FCRIT_TABLE.toFixed(2)}, ${pText(st.p)}). Sample means: ${M.map((m,i)=>`Machine ${m} ${r2(st.means[i])} g`).join(', ')}.</p>
+  <p>Choose the recommendation that your evidence supports.</p>
+  ${opts.map((o,i)=>{let cls='';if(rc.done&&rc.choice===i)cls='right';else if(rc.checks&&rc.choice===i&&!rc.done)cls='wrong';
+    const why=(rc.checks&&rc.choice===i&&!rc.done)?`<div class="why">${o.why||(o.fits==='reject'?'Your test did not find evidence of a difference, so this goes beyond what your data show.':'Your test found evidence that the averages differ, so leaving the line alone ignores your own result.')}</div>`:'';
+    return `<label class="choice ${cls}"><input type="radio" name="rec" value="${i}" ${rc.choice===i?'checked':''} ${rc.done?'disabled':''}><span>${o.t}${why}</span></label>`;}).join('')}
+  <div class="actions">${rc.done?`<span class="feedback ok">Good call. ${rc.pts} of 10 points.</span><button class="btn" id="btnSum">See the summary card</button>`:`<button class="btn" id="btnRec">Check recommendation</button><span class="feedback" id="fbRec"></span>`}</div>
+  </section>`;
+  main.querySelectorAll('input[name=rec]').forEach(r=>r.onchange=()=>{rc.choice=+r.value;save();});
+  if($('btnRec'))$('btnRec').onclick=()=>{
+    if(rc.choice===null){$('fbRec').className='feedback no';$('fbRec').textContent='Pick one option first.';return;}
+    rc.checks++;
+    if(opts[rc.choice].fits===(reject?'reject':'fail')){rc.done=true;rc.pts=pointsFor(rc.checks);rc.text=opts[rc.choice].t;}
+    save();renderRec();
+  };
+  if($('btnSum'))$('btnSum').onclick=()=>{if(!S.finishedAt)S.finishedAt=Date.now();save();go(5);};
+}
+
+/* ================= 6. summary card ================= */
+function hash(str){let h=5381;for(let i=0;i<str.length;i++)h=((h<<5)+h+str.charCodeAt(i))>>>0;return h.toString(36).toUpperCase().slice(-6).padStart(6,'0');}
+function renderSummary(){
+  if(INSTRUCTOR)ensureRec();
+  if(!S.rec.done){main.innerHTML=`<section class="panel"><h2>Summary card</h2><p>Finish your recommendation first.</p><div class="actions"><button class="btn" id="b">Go to the recommendation</button></div></section>`;$('b').onclick=()=>go(4);return;}
+  const st=stats();
+  const total=S.hyp.pts+S.solver.pts.reduce((a,b)=>a+b,0)+S.dec.pts+S.rec.pts;
+  const checks=S.hyp.checks+S.solver.checks.reduce((a,b)=>a+b,0)+S.dec.checks+S.rec.checks;
+  const mins=S.startedAt&&S.finishedAt?Math.max(1,Math.round((S.finishedAt-S.startedAt)/60000)):null;
+  const when=new Date(S.finishedAt||Date.now());
+  const preds=PREDS;
+  const code=hash(S.group+'|'+S.samples.map(s=>s.m+':'+s.w).join(',')+'|'+total+'|'+S.finishedAt);
+  const reject=S.dec.choice===0;
+  main.innerHTML=`<div class="card" id="card">
+    <div class="card-head"><div><div style="font-size:14px;opacity:.8">Candy factory investigation report</div><h2>${esc(S.group||'Unnamed')}</h2></div><div style="text-align:right"><div class="score">${total}/80</div><div style="font-size:13px;opacity:.8">points</div></div></div>
+    <div class="card-body">
+      <dl class="kv">
+        <dt>Hypotheses</dt><dd>H₀: μA = μB = μC. H₁: at least one μ differs.</dd>
+        <dt>Machine that looked off</dt><dd>${preds[S.hyp.pred]??'None'}</dd>
+        <dt>Bags pulled</dt><dd>n = ${PER} per machine, N = ${st.N}</dd>
+        <dt>Sample means</dt><dd>${M.map((m,i)=>`${m}: ${r2(st.means[i])} g`).join(', ')}. Overall: ${r2(st.GM)} g</dd>
+      </dl>
+      <h3>ANOVA table</h3>
+      <div class="tablewrap" style="max-height:none"><table class="atable">
+        <tr><th>Source</th><th>SS</th><th>df</th><th>MS</th><th>F₀</th></tr>
+        <tr><td>Treatments (machines)</td><td>${r2(st.sstr)}</td><td>${st.dftr}</td><td>${r2(st.mstr)}</td><td>${r2(st.F)}</td></tr>
+        <tr><td>Error</td><td>${r2(st.sse)}</td><td>${st.dfe}</td><td>${r2(st.mse)}</td><td></td></tr>
+        <tr><td>Total</td><td>${r2(st.sst)}</td><td>${st.dft}</td><td></td><td></td></tr>
+      </table></div>
+      <dl class="kv" style="margin-top:12px">
+        <dt>F critical (α = 0.05)</dt><dd>${FCRIT_TABLE.toFixed(2)}</dd>
+        <dt>p-value</dt><dd>${st.p<0.001?'less than 0.001':st.p.toFixed(3)}</dd>
+        <dt>Decision</dt><dd>${reject?'Reject H₀':'Fail to reject H₀'}</dd>
+        <dt>Recommendation</dt><dd>${esc(S.rec.text||recOptions()[S.rec.choice].t)}</dd>
+        <dt>Formulas used</dt><dd>${[['sstr','SSTr'],['sst','SST'],['sse','SSE']].map(([k,n])=>`${n} = <code>${esc(S.solver.inputs[k]||'')}</code>`).join('<br>')}</dd>
+        <dt>Total checks used</dt><dd>${checks}</dd>
+      </dl>
+    </div>
+    <div class="card-foot"><span>${when.toLocaleDateString()} ${when.toLocaleTimeString([], {hour:'numeric',minute:'2-digit'})}${mins?`, ${mins} min`:''}</span><span>Verification code ${code}</span></div>
+  </div>
+  <section class="panel" style="max-width:760px;margin:14px auto">
+    ${INSTRUCTOR?`<h3>Instructor: reveal the hidden truth</h3>
+    <p class="muted">Reveal this after students have submitted their summary cards.</p>
+    <div class="actions"><button class="btn ghost" id="btnTruth">${S.truthShown?'Hide the hidden truth':'Reveal the hidden truth'}</button></div>`:`<h3>Share your summary card above.</h3>
+    <div class="callout">Submit your summary card to your instructor. Then use the section below to see how the result changes when more bags are pulled from each machine.</div>`}
+    ${INSTRUCTOR?`<div id="truth" class="${S.truthShown?'':'hidden'}">
+      <div class="callout">The factory was set up so that Machine A filled an average of ${r1(TRUE_MEANS[0])} g, Machine B ${r1(TRUE_MEANS[1])} g, and Machine C ${r1(TRUE_MEANS[2])} g, with bag-to-bag variation of about ${r1(SIGMA)} g. Machine C was underfilling.</div>
+      <p>Students who rejected H₀ detected a real difference. Students who failed to reject H₀ missed it even though Machine C really was off. With this much bag-to-bag variation, a sample of ${PER} bags per machine can miss a real difference. That is a Type II error, and more bags per machine make it less likely.</p>
+      <p class="muted">Discussion: did every student reach the same decision? If not, why would students sampling the same factory disagree?</p>
+      ${powerSection()}
+    </div>`:''}
+  </section>
+  ${whatIfSection()}`;
+  if($('btnTruth'))$('btnTruth').onclick=()=>{S.truthShown=!S.truthShown;save();renderSummary();};
+  initPower();
+  initWhatIf();
+}
+
+/* ================= what if we pulled more bags? ================= */
+const WI={n:PER,hist:[]};
+function anovaOf(g){
+  const n=g.map(x=>x.length),N=n[0]+n[1]+n[2],means=g.map(x=>x.reduce((p,q)=>p+q,0)/x.length);
+  const GM=g.flat().reduce((p,q)=>p+q,0)/N;let sstr=0,sse=0;
+  g.forEach((x,i)=>{sstr+=x.length*(means[i]-GM)**2;x.forEach(v=>sse+=(v-means[i])**2);});
+  const dfe=N-3,mstr=sstr/2,mse=sse/dfe,F=mstr/mse,fc=fCrit(2,dfe,0.05);
+  return {n:n[0],N,means,sstr,sse,dfe,mstr,mse,F,fc,p:fTail(F,2,dfe),reject:F>fc};
+}
+function wiDraw(n){
+  if(n===PER){const st=stats();return Object.assign(anovaOf(st.g),{yours:true});}
+  const g=[0,1,2].map(i=>Array.from({length:n},()=>Math.round((TRUE_MEANS[i]+SIGMA*randn())*10)/10));
+  return anovaOf(g);
+}
+function wiResult(r){
+  return `<div class="pwgrid">
+      <div><div class="muted">n per machine</div><div class="pwnum">${r.n}</div></div>
+      <div><div class="muted">F₀</div><div class="pwnum">${r2(r.F)}</div></div>
+      <div><div class="muted">F critical (2, ${r.dfe})</div><div class="pwnum">${r2(r.fc)}</div></div>
+      <div><div class="muted">p-value</div><div class="pwnum">${r.p<0.001?'&lt;0.001':r.p.toFixed(3)}</div></div></div>
+    <p><strong>${r.reject?'Reject H₀':'Fail to reject H₀'}</strong>${r.yours?' (your own data)':''}. Sample means: ${M.map((m,i)=>`${m} ${r1(r.means[i])} g`).join(', ')}.</p>`;
+}
+function wiHist(){
+  if(!WI.hist.length)return '';
+  return `<h3 style="margin-top:14px">Your draws so far</h3><div class="tablewrap" style="max-height:260px"><table class="atable">
+    <tr><th>#</th><th>n</th><th>Mean A</th><th>Mean B</th><th>Mean C</th><th>F₀</th><th>F crit</th><th>Decision</th></tr>
+    ${WI.hist.map((r,k)=>`<tr><td>${k+1}${r.yours?' (yours)':''}</td><td>${r.n}</td>${r.means.map(m=>`<td>${r1(m)}</td>`).join('')}<td>${r2(r.F)}</td><td>${r2(r.fc)}</td><td>${r.reject?'Reject':'Fail to reject'}</td></tr>`).join('')}
+  </table></div>`;
+}
+function whatIfSection(){
+  return `<section class="panel" style="max-width:760px;margin:14px auto"><details id="wiBox" open>
+    <summary style="cursor:pointer"><h3 style="display:inline">What if we pulled more bags?</h3></summary>
+    <p style="margin-top:12px">You pulled ${PER} bags per machine. Pick a larger sample size, and the factory will pull that many new bags from each machine, from the same three machines you studied. Draw a few times at each size and watch how the decision changes.</p>
+    <div class="actions" style="margin-top:6px">${[PER,7,10,20].map(n=>`<button class="btn small ${WI.n===n?'':'ghost'}" data-win="${n}">n = ${n}${n===PER?' (yours)':''}</button>`).join('')}
+      <button class="btn small" id="wiDraw">${WI.n===PER?'Show my result':'Draw new bags'}</button></div>
+    <div id="wiOut" style="margin-top:12px">${WI.hist.length?wiResult(WI.hist[WI.hist.length-1]):''}</div>
+    <div id="wiHist">${wiHist()}</div>
+    <p class="muted" style="margin-top:10px">Question to think about: as n grows, does the decision settle down? What does that tell you about the risk of a Type II error with ${PER} bags?</p>
+  </details></section>`;
+}
+function initWhatIf(){
+  document.querySelectorAll('[data-win]').forEach(b=>b.onclick=()=>{WI.n=+b.dataset.win;
+    document.querySelectorAll('[data-win]').forEach(x=>x.classList.toggle('ghost',+x.dataset.win!==WI.n));
+    $('wiDraw').textContent=WI.n===PER?'Show my result':'Draw new bags';});
+  const d=$('wiDraw');if(d)d.onclick=()=>{const r=wiDraw(WI.n);WI.hist.push(r);$('wiOut').innerHTML=wiResult(r);$('wiHist').innerHTML=wiHist();};
+}
+
+/* ================= sample size (power.anova.test style) ================= */
+function ncfCdf(x,d1,d2,lam){
+  const z=d1*x/(d1*x+d2),h=lam/2;let sum=0,w=Math.exp(-h);
+  for(let j=0;j<400;j++){
+    if(j>0)w*=h/j;
+    sum+=w*ibeta(z,d1/2+j,d2/2);
+    if(j>h&&w<1e-12)break;
+  }
+  return Math.min(1,Math.max(0,sum));
+}
+/* same model as R power.anova.test: lambda = (groups-1) * n * between.var / within.var */
+function anovaPower(n,g,bv,wv,alpha){const d1=g-1,d2=(n-1)*g,lam=d1*n*bv/wv;return 1-ncfCdf(fCrit(d1,d2,alpha),d1,d2,lam);}
+function solveN(g,bv,wv,alpha,target){let lo=2,hi=500;for(let i=0;i<60;i++){const m=(lo+hi)/2;if(anovaPower(m,g,bv,wv,alpha)<target)lo=m;else hi=m;}return (lo+hi)/2;}
+const PT={g:3,bv:(()=>{const m=TRUE_MEANS.reduce((p,q)=>p+q,0)/3;return TRUE_MEANS.reduce((p,q)=>p+(q-m)**2,0)/2;})(),wv:SIGMA**2,alpha:0.05,power:0.90};
+PT.n=solveN(PT.g,PT.bv,PT.wv,PT.alpha,PT.power);PT.ceil=Math.ceil(PT.n-1e-9);
+const PW=[];for(let n=2;n<=15;n++)PW.push({n,power:anovaPower(n,PT.g,PT.bv,PT.wv,PT.alpha)});
+const PFIELDS=[
+  ['groups','groups',v=>Math.abs(v-PT.g)<1e-9,'Count the machines.'],
+  ['bv','between.var',v=>Math.abs(v-PT.bv)<=0.01*PT.bv,'Use var(groupmeans). R\'s var() divides by (number of groups − 1).'],
+  ['wv','within.var',v=>Math.abs(v-PT.wv)<1e-6,'within.var is σ², so square sig.'],
+  ['sl','sig.level',v=>Math.abs(v-0.05)<1e-9,'Use α = 0.05.'],
+  ['pw','power',v=>Math.abs(v-0.90)<1e-9,'The target power is 0.90.']
+];
+function powerSection(){
+  return `<div class="powerbox">
+  <h3 style="font-size:22px;margin:22px 0 8px">Sample size: how many bags per machine?</h3>
+  <p>Now you know the true machine means and σ. Plan the next study the same way we did in class: find the n per machine that gives <strong>power = 0.90</strong> at α = 0.05.</p>
+  <div class="rcode">
+    <div>groupmeans &lt;- c(${TRUE_MEANS.map(m=>m.toFixed(0)).join(', ')})</div>
+    <div>sig &lt;- ${SIGMA}</div>
+    <div>power.anova.test(</div>
+    ${PFIELDS.map(([k,lab],i)=>`<div class="rrow"><span class="rarg">${lab}</span> = <input id="pt_${k}" class="rin" spellcheck="false" autocomplete="off" aria-label="${lab}">${i<PFIELDS.length-1?',':')'}</div>`).join('')}
+  </div>
+  <p class="muted" style="font-size:15px">Type each input the way you would in R, for example <code>sig^2</code> or <code>var(groupmeans)</code>. Plain numbers work too.</p>
+  <details class="hint"><summary>What do between.var and within.var mean?</summary><p>
+  <strong>between.var</strong> measures how spread out the true machine means are. In R it is <code>var(groupmeans)</code>, which equals Σ(μᵢ − μ̄)² ÷ (a − 1). For these means: μ̄ = ${r2(TRUE_MEANS.reduce((p,q)=>p+q,0)/3)}, so it is the sum of the squared distances of 250, 251, and 245 from μ̄, divided by 2.<br><br>
+  <strong>within.var</strong> is the bag-to-bag variance inside one machine, σ². In R it is <code>sig^2</code>.<br><br>
+  A bigger between.var (machines further apart) or a smaller within.var (more consistent bags) means fewer bags are needed.</p></details>
+  <div class="actions" style="margin-top:6px"><button class="btn small" id="ptRun">Run power.anova.test</button><span class="feedback" id="ptFb"></span></div>
+  <pre class="rout hidden" id="ptOut"></pre>
+  <div id="ptRound" class="hidden">
+    <p><strong>How many bags per machine should the next study use?</strong></p>
+    <div class="actions" style="margin-top:6px"><input id="ptN" type="number" min="2" step="1" style="width:90px;padding:8px 10px;border:1.5px solid var(--line);border-radius:8px;background:var(--bg)"><button class="btn small" id="ptNCheck">Check</button><span class="feedback" id="ptNFb"></span></div>
+  </div>
+  <div id="pwTool" class="hidden">
+    <h3 style="margin-top:18px">Check it on the power curve</h3>
+    <label class="fin"><span class="l">Bags per machine, n = <span id="pwN">6</span></span><input type="range" id="pwSlider" min="2" max="15" value="${PT.ceil}" style="width:100%;accent-color:var(--gold)"></label>
+    <div class="pwgrid">
+      <div><div class="muted">n per machine</div><div class="pwnum" id="pwNn"></div></div>
+      <div><div class="muted">Total bags</div><div class="pwnum" id="pwTot"></div></div>
+      <div><div class="muted">F critical</div><div class="pwnum" id="pwFc"></div></div>
+      <div><div class="muted">Power</div><div class="pwnum" id="pwPow" style="color:var(--mA)"></div></div>
+    </div>
+    <div class="mini" id="pwChart"></div>
+    <p id="pwText"></p>
+  </div>
+  </div>`;
+}
+function powerChart(sel){
+  const W=520,H=230,ml=44,mr=14,mt=12,mb=36;
+  const x=n=>ml+(n-2)/(15-2)*(W-ml-mr),y=p=>mt+(1-p)*(H-mt-mb);
+  let s='';
+  [0,0.25,0.5,0.75,1].forEach(p=>s+=`<line x1="${ml}" x2="${W-mr}" y1="${y(p)}" y2="${y(p)}" style="stroke:var(--line)"/><text x="${ml-6}" y="${y(p)+4}" text-anchor="end">${Math.round(p*100)}%</text>`);
+  s+=`<line x1="${ml}" x2="${W-mr}" y1="${y(0.9)}" y2="${y(0.9)}" style="stroke:var(--gold);stroke-width:1.5;stroke-dasharray:5 4"/><text x="${ml+4}" y="${y(0.9)-4}">target 0.90</text>`;
+  s+=`<line x1="${x(PT.n)}" x2="${x(PT.n)}" y1="${mt}" y2="${H-mb}" style="stroke:var(--muted);stroke-dasharray:3 4"/><text x="${x(PT.n)-4}" y="${H-mb-6}" text-anchor="end">n = ${PT.n.toFixed(2)}</text>`;
+  PW.forEach(r=>s+=`<text x="${x(r.n)}" y="${H-mb+16}" text-anchor="middle">${r.n}</text>`);
+  s+=`<text x="${(ml+W-mr)/2}" y="${H-4}" text-anchor="middle">bags per machine, n</text>`;
+  s+=`<path d="${PW.map((r,i)=>(i?'L':'M')+x(r.n).toFixed(1)+','+y(r.power).toFixed(1)).join(' ')}" style="fill:none;stroke:var(--ink);stroke-width:2.5"/>`;
+  PW.forEach(r=>s+=`<circle cx="${x(r.n)}" cy="${y(r.power)}" r="${r.n===sel?7:3.5}" style="fill:${r.n===sel?'var(--mA)':'var(--ink)'}"/>`);
+  return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Power versus bags per machine">${s}</svg>`;
+}
+function rVecStats(xs){const m=xs.reduce((p,q)=>p+q,0)/xs.length;return {mean:m,var:xs.reduce((p,q)=>p+(q-m)**2,0)/(xs.length-1)};}
+function powerEval(src){
+  let t=String(src??'').trim();
+  if(!t)throw new Error('empty');
+  const vec=inner=>{const nm=inner.trim();if(/^groupmeans$/i.test(nm))return TRUE_MEANS.slice();
+    const m=nm.match(/^c\s*\(([^()]*)\)$/i);if(m){const xs=m[1].split(',').map(x=>parseFloat(x));if(xs.length>1&&xs.every(isFinite))return xs;}
+    throw new Error('vector');};
+  t=t.replace(/\b(var|mean|sd)\s*\(\s*(groupmeans|c\s*\([^()]*\))\s*\)/gi,(_,f,inner)=>{const st=rVecStats(vec(inner));const fl=f.toLowerCase();return '('+(fl==='var'?st.var:fl==='mean'?st.mean:Math.sqrt(st.var))+')';});
+  if(/groupmeans/i.test(t))throw new Error('groupmeans');
+  return evalExpr(t,{sig:SIGMA});
+}
+function initPower(){
+  if(!$('ptRun'))return;
+  const ins=PFIELDS.map(([k])=>$('pt_'+k));
+  ins.forEach(i=>i.oninput=()=>{i.classList.remove('ok','no');});
+  $('ptRun').onclick=()=>{
+    const fb=$('ptFb');let firstBad=null;
+    PFIELDS.forEach(([k,lab,ok,tip],i)=>{
+      let v=NaN;try{v=powerEval(ins[i].value);}catch(e){if(e.message==='groupmeans'&&!firstBad)firstBad=`${lab}: groupmeans is a list of numbers. Use var(groupmeans).`;}
+      const good=isFinite(v)&&ok(v);
+      ins[i].classList.toggle('ok',good);ins[i].classList.toggle('no',!good);
+      if(!good&&!firstBad)firstBad=`${lab}: ${tip}`;
+    });
+    if(firstBad){fb.className='feedback no';fb.textContent=firstBad;$('ptOut').classList.add('hidden');return;}
+    fb.className='feedback ok';fb.textContent='All inputs correct.';
+    $('ptOut').textContent=`     Balanced one-way analysis of variance power calculation
+
+         groups = ${PT.g}
+              n = ${PT.n.toFixed(5)}
+    between.var = ${PT.bv.toFixed(5)}
+     within.var = ${PT.wv}
+      sig.level = 0.05
+          power = 0.9
+
+NOTE: n is number in each group`;
+    $('ptOut').classList.remove('hidden');$('ptRound').classList.remove('hidden');
+  };
+  $('ptNCheck').onclick=()=>{
+    const g=+$('ptN').value,fb=$('ptNFb');
+    if(!(g>=2)){fb.className='feedback no';fb.textContent='Enter a whole number.';return;}
+    if(g===PT.ceil){fb.className='feedback ok';fb.textContent=`Correct. Round n = ${PT.n.toFixed(2)} up to ${PT.ceil} bags per machine (${3*PT.ceil} bags in total).`;}
+    else if(g<PT.ceil){fb.className='feedback no';fb.textContent=`n = ${g} gives only about ${Math.round(anovaPower(g,PT.g,PT.bv,PT.wv,0.05)*100)}% power. Always round n up.`;}
+    else{fb.className='feedback no';fb.textContent=`That reaches the target, but it uses more bags than needed. Round ${PT.n.toFixed(2)} up to the next whole number.`;}
+    if(g===PT.ceil){$('pwTool').classList.remove('hidden');upd();}
+  };
+  const upd=()=>{
+    const n=+$('pwSlider').value,r=PW.find(q=>q.n===n);
+    $('pwN').textContent=n;$('pwNn').textContent=n;$('pwTot').textContent=3*n;$('pwFc').textContent=r2(fCrit(2,3*(n-1),0.05));
+    $('pwPow').textContent=Math.round(r.power*100)+'%';$('pwChart').innerHTML=powerChart(n);
+    const six=PW.find(q=>q.n===PER);
+    $('pwText').innerHTML=`With n = ${n} bags per machine, about ${Math.round(r.power*100)} out of 100 students would reject H₀. Your game used n = ${PER}, which gives about ${Math.round(six.power*100)}% power, well below the 0.90 target.`;
+  };
+  $('pwSlider').oninput=upd;
+}
+
+/* ================= restart ================= */
+let armed=false;
+$('btnRestart').onclick=()=>{
+  const b=$('btnRestart');
+  if(!armed){armed=true;b.textContent='Click again to erase everything';setTimeout(()=>{armed=false;b.textContent='Start over';},4000);return;}
+  armed=false;b.textContent='Start over';stopFactory();S=fresh();save();go(0);
+};
+
+if(INSTRUCTOR){
+  $('footLabel').textContent='ISE 8110 Design of Experiments: Instructor version';
+  const bn=document.createElement('div');bn.className='wrap';
+  bn.innerHTML='<div class="callout" style="margin:8px 0 0">Instructor version. Every page is open. Pages that need data fill in with a demo sample, and this version keeps its own saved progress separate from the student version.</div>';
+  document.querySelector('header.top').after(bn);
+}
+go(Math.min(S.stage,S.reached));
+})();
+</script>
+</body>
+</html>
