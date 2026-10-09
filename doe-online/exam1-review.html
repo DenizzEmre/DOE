@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Exam 1 Review: The Audit</title>
+<style>
+:root{
+  --bg:#F7F2EA; --panel:#FFFFFF; --ink:#1C1626; --muted:#6A6274; --line:#E3D9CB;
+  --night:#1C1626; --belt1:#2B2433; --belt2:#221C29;
+  --mA:#E8741E; --mB:#7E57C2; --mC:#4E9A2F;
+  --gold:#FDB719; --ok:#2E7D32; --bad:#C62828; --tan:#F6E7C8; --tan-ink:#3D2E10;
+  --title:"Bricolage Grotesque","Satoshi","Helvetica Neue",Arial,sans-serif;
+  --body:"Aptos","Segoe UI","Helvetica Neue",Arial,sans-serif;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#141019; --panel:#1F1928; --ink:#F3EEE6; --muted:#B3AABD; --line:#362E41;
+    --night:#0E0B12; --mA:#F28C28; --mB:#A784E0; --mC:#7CC456;
+    --ok:#7BC67E; --bad:#F07A7A; --tan:#3A2F1C; --tan-ink:#F6E7C8;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#141019; --panel:#1F1928; --ink:#F3EEE6; --muted:#B3AABD; --line:#362E41;
+  --night:#0E0B12; --mA:#F28C28; --mB:#A784E0; --mC:#7CC456;
+  --ok:#7BC67E; --bad:#F07A7A; --tan:#3A2F1C; --tan-ink:#F6E7C8;
+}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.5;padding-bottom:56px}
+h1,h2,h3{font-family:var(--title);font-weight:800;line-height:1.12;margin:0;letter-spacing:-0.01em}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.wrap{max-width:1120px;margin:0 auto;padding:0 22px}
+
+header.top{padding:20px 0 6px}
+header.top .brand{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}
+header.top h1{font-size:clamp(26px,3.4vw,38px)}
+header.top .co{color:var(--muted);font-weight:600}
+.stepper{display:flex;flex-wrap:wrap;gap:6px;margin:14px 0 4px;padding:0;list-style:none}
+.stepper button{border:1.5px solid var(--line);background:transparent;border-radius:999px;padding:6px 13px;font-size:14px;font-weight:600;color:var(--muted)}
+.stepper button.done{color:var(--ink)}
+.stepper button.done::before{content:"✓ ";color:var(--ok)}
+.stepper button[aria-current="step"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.stepper button:disabled{opacity:.45;cursor:not-allowed}
+
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:24px;margin:14px 0}
+.panel h2{font-size:clamp(24px,3vw,32px);margin-bottom:12px}
+.panel h3{font-size:20px;margin-bottom:8px}
+.panel p{max-width:68ch;margin:0 0 12px}
+.muted{color:var(--muted)}
+.callout{background:var(--tan);color:var(--tan-ink);border-radius:10px;padding:14px 16px;margin:14px 0}
+.memo{border-left:5px solid var(--mA);padding:4px 0 4px 18px;margin:16px 0}
+.memo .from{font-weight:700}
+ol.plan{padding-left:22px;margin:8px 0 0}
+ol.plan li{margin:4px 0}
+
+.btn{border:0;border-radius:9px;padding:12px 20px;font-weight:700;font-size:17px;background:var(--gold);color:#000}
+.btn.ghost{background:transparent;color:var(--ink);border:1.5px solid var(--line)}
+.btn.small{padding:7px 12px;font-size:15px}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.actions{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:18px}
+
+.field{display:flex;flex-direction:column;gap:4px;margin:10px 0;max-width:420px}
+.field label{font-weight:600}
+.field input{padding:10px 12px;border:1.5px solid var(--line);border-radius:8px;background:var(--bg)}
+
+/* choices */
+fieldset{border:0;padding:0;margin:0 0 18px}
+legend{font-family:var(--title);font-weight:800;font-size:20px;margin-bottom:8px}
+.choice{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border:1.5px solid var(--line);border-radius:10px;margin:6px 0;cursor:pointer;max-width:720px}
+.choice input{margin-top:5px}
+.choice.right{border-color:var(--ok);background:color-mix(in srgb,var(--ok) 10%,transparent)}
+.choice.wrong{border-color:var(--bad);background:color-mix(in srgb,var(--bad) 8%,transparent)}
+.why{font-size:15px;color:var(--muted);margin-top:4px}
+.feedback{font-weight:600;margin-top:8px}
+.feedback.ok{color:var(--ok)}
+.feedback.no{color:var(--bad)}
+
+/* factory */
+.factory{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:18px;align-items:start}
+@media (max-width:860px){.factory{grid-template-columns:1fr}}
+.floor{background:var(--night);border-radius:14px;padding:14px;color:#F3EEE6}
+.lane{margin:6px 0 14px}
+.lane-head{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:6px;font-size:15px}
+.lane-head strong{font-family:var(--title);font-size:18px}
+.mdot{display:inline-block;width:12px;height:12px;border-radius:50%;margin-right:7px;vertical-align:0}
+.belt{position:relative;height:86px;border-radius:10px;overflow:hidden;background:repeating-linear-gradient(90deg,var(--belt1) 0 18px,var(--belt2) 18px 36px);background-size:36px 100%;animation:belt 0.7s linear infinite;border-bottom:4px solid #0007}
+@keyframes belt{to{background-position:36px 0}}
+.machine-box{position:absolute;left:0;top:0;bottom:0;width:62px;background:#0E0B12;border-right:3px solid var(--mc);display:flex;align-items:center;justify-content:center;z-index:2;font-family:var(--title);font-weight:800;font-size:28px;color:var(--mc)}
+.bag{position:absolute;left:0;top:12px;width:50px;height:62px;border:0;background:none;padding:0;z-index:1;transition:opacity .3s,top .3s}
+.bag svg{width:100%;height:100%;display:block}
+.bag:hover svg{filter:brightness(1.15)}
+.belt.full .bag{opacity:.35;pointer-events:none}
+.bag.picked{top:-70px;opacity:0;pointer-events:none}
+.pull{background:transparent;border:1px solid #ffffff40;color:#F3EEE6;border-radius:7px;padding:4px 10px;font-size:14px}
+.pull:disabled{opacity:.35;cursor:not-allowed}
+.budget{display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px;font-size:15px;margin-bottom:4px}
+.budget b{font-family:var(--title);font-size:20px;color:var(--gold)}
+
+.scale{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;text-align:center}
+.scale .lbl{color:var(--muted);font-size:15px}
+.scale .read{font-family:var(--title);font-weight:800;font-size:46px;line-height:1.1;margin:4px 0;font-variant-numeric:tabular-nums}
+.scale .plate{height:10px;border-radius:5px;background:var(--line);margin:8px auto 0;width:70%}
+
+.dtable{width:100%;border-collapse:collapse;font-size:15px;font-variant-numeric:tabular-nums}
+.dtable th,.dtable td{padding:4px 8px;text-align:right;border-bottom:1px solid var(--line)}
+.dtable th{font-weight:700}
+.tablewrap{overflow-x:auto;max-height:340px;overflow-y:auto}
+.mini svg{width:100%;height:auto;display:block}
+svg text{font-family:var(--body);fill:var(--muted);font-size:12px}
+
+/* solver */
+.solver{display:grid;grid-template-columns:minmax(0,0.9fr) minmax(0,1.4fr);gap:18px;align-items:start}
+@media (max-width:860px){.solver{grid-template-columns:1fr}}
+.datacard{position:sticky;top:10px}
+.step{border:1.5px solid var(--line);border-radius:12px;padding:16px;margin:0 0 12px;background:var(--panel)}
+.step.locked{opacity:.45}
+.step.solved{border-color:var(--ok)}
+.step h3{font-size:19px;margin-bottom:4px}
+.grid-in{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin-top:10px}
+.in{display:flex;flex-direction:column;gap:3px;font-size:15px}
+.in span.l{font-weight:600}
+.in input{padding:8px 10px;border:1.5px solid var(--line);border-radius:8px;background:var(--bg);font-variant-numeric:tabular-nums;width:100%}
+.in input.ok{border-color:var(--ok)}
+.in input.no{border-color:var(--bad)}
+.in input:disabled{opacity:.9}
+.hint{font-size:15px;color:var(--muted);margin-top:8px}
+.hint summary{cursor:pointer;font-weight:600;color:var(--ink)}
+.pts{float:right;font-size:14px;color:var(--muted);font-weight:600}
+
+/* summary card */
+.card{max-width:760px;margin:14px auto;background:var(--panel);border:2px solid var(--ink);border-radius:16px;overflow:hidden}
+.card-head{background:var(--night);color:#F3EEE6;padding:18px 22px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:flex-end}
+.card-head h2{font-size:24px}
+.card-head .score{font-family:var(--title);font-weight:800;font-size:40px;color:var(--gold);line-height:1}
+.card-body{padding:18px 22px}
+.card-body h3{font-size:17px;margin:14px 0 6px}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:4px 16px;font-size:15px}
+.kv dt{color:var(--muted)}
+.kv dd{margin:0;font-weight:600}
+.atable{width:100%;border-collapse:collapse;font-size:15px;font-variant-numeric:tabular-nums}
+.atable th,.atable td{padding:6px 8px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
+.atable th:first-child,.atable td:first-child{text-align:left}
+.card-foot{display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;padding:10px 22px;border-top:1px solid var(--line);font-size:13px;color:var(--muted)}
+
+footer.goldbar{position:fixed;left:0;right:0;bottom:0;background:var(--gold);color:#000;padding:8px 22px;padding-bottom:calc(8px + env(safe-area-inset-bottom,0px));display:flex;justify-content:space-between;align-items:center;font-weight:700;font-size:14px;z-index:9}
+footer.goldbar button{background:transparent;border:1px solid #0006;border-radius:6px;padding:2px 10px;font-size:13px;font-weight:600;color:#000}
+.hidden{display:none !important}
+.blank{display:inline-block;width:7em;max-width:100%;border-bottom:2px dotted var(--muted);height:1.1em;vertical-align:-2px}
+.rcode,.rout{font-family:ui-monospace,"Cascadia Mono",Consolas,monospace;font-size:15px;background:color-mix(in srgb,var(--ink) 6%,transparent);border:1px solid var(--line);border-radius:8px;padding:14px 16px;margin:12px 0;overflow-x:auto;line-height:1.7}
+.rout{white-space:pre;margin-top:14px}
+.rrow{padding-left:2.2em;white-space:nowrap}
+.rarg{display:inline-block;min-width:7.5em}
+.rin{font:inherit;width:9em;padding:3px 8px;border:1.5px solid var(--line);border-radius:6px;background:var(--bg)}
+.rin.ok{border-color:var(--ok)}.rin.no{border-color:var(--bad)}
+.pwgrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:8px 0 12px}
+@media (max-width:560px){.pwgrid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.pwgrid>div{border:1px solid var(--line);border-radius:10px;padding:8px 10px}
+.pwnum{font-family:var(--title);font-weight:800;font-size:26px;font-variant-numeric:tabular-nums}
+code{font-family:ui-monospace,"Cascadia Mono",Consolas,monospace;font-size:.92em;background:color-mix(in srgb,var(--ink) 8%,transparent);padding:1px 5px;border-radius:4px}
+.vtable{width:100%;border-collapse:collapse;font-size:14px}
+.vtable td{padding:4px 6px;border-bottom:1px solid var(--line);vertical-align:middle}
+.vtable td.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.chip{border:1.5px solid var(--line);background:var(--bg);border-radius:6px;padding:2px 8px;font-family:ui-monospace,"Cascadia Mono",Consolas,monospace;font-size:14px;font-weight:600;white-space:nowrap}
+.chip:hover{border-color:var(--gold)}
+.fin{display:block;margin:12px 0}
+.fin .l{display:block;font-weight:600;font-size:15px;margin-bottom:4px}
+.frow{display:flex;align-items:center;gap:8px}
+.frow .eq{font-family:ui-monospace,"Cascadia Mono",Consolas,monospace;font-size:15px;white-space:nowrap;color:var(--muted)}
+.frow input{flex:1;min-width:0;padding:9px 11px;border:1.5px solid var(--line);border-radius:8px;background:var(--bg);font-family:ui-monospace,"Cascadia Mono",Consolas,monospace;font-size:15px}
+.frow input.ok{border-color:var(--ok)}
+.frow input.no{border-color:var(--bad)}
+.preview{display:block;min-height:1.4em;font-size:15px;font-variant-numeric:tabular-nums;margin-top:3px;padding-left:2px}
+.perr{color:var(--bad)}
+@media (prefers-reduced-motion: reduce){.belt{animation:none}.bag{transition:none}}
+
+.sim{display:grid;grid-template-columns:minmax(0,0.8fr) minmax(0,1.4fr);gap:18px;align-items:start}
+@media (max-width:760px){.sim{grid-template-columns:1fr}}
+.pbar{height:14px;border-radius:7px;background:var(--line);overflow:hidden}
+.pbar span{display:block;height:100%;background:var(--gold);transition:width .2s}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+.plotcard svg{max-width:460px}
+.vtable select,.in select{padding:6px 8px;border:1.5px solid var(--line);border-radius:8px;background:var(--bg);max-width:100%}
+.vtable td{padding:8px 6px}
+.in input[type=range]{padding:0;border:0;accent-color:var(--gold)}
+.choice span{flex:1}
+.datacard{position:static}
+.formula{font-family:"Cambria Math","STIX Two Math","Times New Roman",serif;font-size:18px;background:color-mix(in srgb,var(--gold) 12%,transparent);border-left:4px solid var(--gold);border-radius:6px;padding:8px 14px;margin:0 0 14px;overflow-x:auto;white-space:nowrap}
+.formula .fl{font-family:var(--body);font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-right:12px}
+</style>
+</head>
+<body>
+<header class="top wrap">
+  <div class="brand"><h1>Exam 1 Review: The Audit</h1><span class="co">Candy factory, part 2</span></div>
+  <nav aria-label="Review rooms"><ul class="stepper" id="stepper"></ul></nav>
+</header>
+<main class="wrap" id="main"></main>
+<footer class="goldbar"><span id="footLabel">ISE 8110 Design of Experiments</span><button id="btnRestart">Start over</button></footer>
+<script>
+(function(){
+'use strict';
+const INSTR = !!window.__INSTRUCTOR;
+const KEY = INSTR ? 'exam1-review-short-instructor-v1' : 'exam1-review-short-v1';
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const subs = t => String(t).replace(/_([A-Za-z.]+)/g,'<sub>$1</sub>');
+const fmt = (x,d) => Number(x).toFixed(d);
+
+/* ---------------- state ---------------- */
+let S = {team:'', view:0, items:{}, startedAt:null};
+try { const raw = localStorage.getItem(KEY); if (raw) S = Object.assign(S, JSON.parse(raw)); } catch(e) {}
+function save(){ try { localStorage.setItem(KEY, JSON.stringify(S)); } catch(e) {} }
+
+/* ---------------- content ---------------- */
+const ROOMS = [
+  {n:1, short:'Sampling Lab', title:'Room 1: The Sampling Lab', topic:'Sampling and the Central Limit Theorem'},
+  {n:2, short:'Quality Alarm', title:'Room 2: The Quality Alarm', topic:'Hypothesis testing'},
+  {n:3, short:'Two Machines', title:'Room 3: Two-Machine Showdown', topic:'Two-sample t-test'},
+  {n:4, short:'ANOVA by Hand', title:'Room 4: ANOVA by Hand', topic:'One-way ANOVA calculations'},
+  {n:5, short:'Auditor’s Printouts', title:'Room 5: The Auditor’s Printouts', topic:'R output and plots'}
+];
+
+const ITEMS_ALL = [
+ /* ---- Room 1 ---- */
+ {id:'1.1', room:1, title:'Who is who?', type:'sel',
+  prompt:'Machine B fills candy bags all day. Match each description to the right term.',
+  rows:[
+   ['Every bag Machine B fills, now and in the future', 'Population'],
+   ['The 36 bags the team pulled and weighed this morning', 'Sample'],
+   ['μ, the true mean weight of all bags from Machine B', 'Parameter'],
+   ['x̄ = 255.4 g, the average of this morning’s 36 bags', 'Statistic']],
+  opts:['Population','Sample','Parameter','Statistic'],
+  why:'A parameter describes the population and is usually unknown. A statistic is computed from the sample and is used to estimate the parameter.'},
+ {id:'1.2', room:1, title:'Why sample at all?', type:'mc',
+  prompt:'Why does the plant weigh a sample of bags instead of every bag?',
+  opts:['Weighing every bag would take too much time and money, and a well-chosen sample estimates the population well',
+        'A sample always gives the exact population mean',
+        'Samples remove all variability from the data',
+        'The population mean can never be estimated'],
+  ans:0,
+  why:'Sampling trades a small, measurable amount of uncertainty for a large saving in cost and time.'},
+ {id:'1.3', room:1, title:'What does the simulator show?', type:'mc',
+  prompt:'Use the simulator above with n = 2, 10, and 30. As the sample size n grows, what happens to the distribution of the sample mean x̄?',
+  opts:['It stays skewed, just like the population',
+        'It becomes approximately normal, stays centered near μ, and gets narrower',
+        'It becomes wider because more bags add more variability',
+        'It moves to the right as n grows'],
+  ans:1,
+  why:'This is the Central Limit Theorem: for large n, x̄ is approximately normal with mean μ and standard deviation σ/√n, even when the population is skewed.'},
+ {id:'1.4', room:1, title:'Shape check', type:'mc',
+  prompt:'After many samples of size n = 30, which statement is correct?',
+  opts:['The individual bag weights are now normally distributed',
+        'The individual bag weights stay right-skewed, while the sample means are approximately normal',
+        'Both the bag weights and the sample means are right-skewed',
+        'Neither distribution has a recognizable shape'],
+  ans:1,
+  why:'Sampling does not change the population. The CLT describes the distribution of the sample mean, not of individual bags.'},
+ {id:'1.5', formula:'SD of x̄ = σ / √n', room:1, title:'Spread of the sample mean', type:'num',
+  prompt:'Machine B has μ = 256 g and σ = 6 g. For samples of n = 36 bags, what is the standard deviation of x̄?',
+  inputs:[{label:'SD of x̄ (g)', ans:1.0, tol:0.02}],
+  why:'SD of x̄ = σ/√n = 6/√36 = 6/6 = 1.0 g.'},
+ {id:'1.6', formula:'z = (x̄ − μ) / (σ / √n)', room:1, title:'How unusual is a heavy sample?', type:'num',
+  prompt:'With n = 36, a sample gives x̄ = 257.5 g. Compute the z-value for this sample mean.',
+  inputs:[{label:'z', ans:1.5, tol:0.02}],
+  why:'z = (257.5 − 256)/1.0 = 1.5, so P(x̄ > 257.5) = P(Z > 1.5) ≈ 0.067.'},
+
+ /* ---- Room 2 ---- */
+ {id:'2.1', room:2, title:'Set up the test', type:'mc',
+  prompt:'Bags are labeled 250 g. The quality alarm checks whether the line’s mean fill has drifted in either direction. Which hypotheses fit?',
+  opts:['H₀: x̄ = 250   vs.   H₁: x̄ ≠ 250',
+        'H₀: μ = 250   vs.   H₁: μ ≠ 250',
+        'H₀: μ ≠ 250   vs.   H₁: μ = 250',
+        'H₀: μ > 250   vs.   H₁: μ < 250'],
+  ans:1,
+  why:'Hypotheses are statements about the population parameter μ, not the sample statistic x̄. The claim we try to find evidence against goes in H₀.'},
+ {id:'2.2', room:2, title:'Name that outcome', type:'sel',
+  prompt:'If the alarm rejects H₀, the line is stopped and recalibrated. Classify each outcome.',
+  rows:[
+   ['The line is filling correctly, but the alarm rejects H₀ and stops it', 'Type I error'],
+   ['The line is underfilling, but the alarm fails to reject H₀', 'Type II error'],
+   ['The line is underfilling, and the alarm rejects H₀', 'Correct decision'],
+   ['The line is filling correctly, and the alarm fails to reject H₀', 'Correct decision']],
+  opts:['Type I error','Type II error','Correct decision'],
+  why:'Type I error: rejecting a true H₀ (a false alarm), probability α. Type II error: failing to reject a false H₀ (a missed problem), probability β.'},
+ {id:'2.3', room:2, title:'Decide with a p-value', type:'sel',
+  prompt:'This morning’s test gives p = 0.031. What is the decision at each significance level?',
+  rows:[['α = 0.05', 'Reject H₀'], ['α = 0.01', 'Fail to reject H₀']],
+  opts:['Reject H₀','Fail to reject H₀'],
+  why:'Reject H₀ when p < α. Here 0.031 < 0.05, but 0.031 > 0.01.'},
+ {id:'2.4', room:2, title:'What is a p-value?', type:'mc',
+  prompt:'Which statement describes the p-value correctly?',
+  opts:['The probability that H₀ is true',
+        'The probability of a Type II error',
+        'The probability of getting a result at least as extreme as the one observed, assuming H₀ is true',
+        'The probability that the sample mean equals the population mean'],
+  ans:2,
+  why:'A small p-value means the observed data would be unusual if H₀ were true, which is evidence against H₀.'},
+ {id:'2.5', room:2, title:'Trade-off', type:'mc',
+  prompt:'Use the power explorer. Keep n fixed and lower α from 0.05 to 0.01. What happens?',
+  opts:['β decreases and power increases',
+        'β increases and power decreases',
+        'β and power both stay the same',
+        'α and β always add up to 1'],
+  ans:1,
+  why:'A smaller α makes it harder to reject H₀, so real shifts are missed more often: β goes up and power = 1 − β goes down.'},
+ {id:'2.6', room:2, title:'More power', type:'multi',
+  prompt:'Which changes increase the power of the test? Select all that apply.',
+  opts:['Increase the sample size n','Use a larger α','Reduce the process variability σ','Look for a smaller true shift in the mean','Report the mean with more decimal places'],
+  ans:[0,1,2],
+  why:'Power grows with n, with α, and with a smaller σ. A smaller true shift is harder to detect, so power drops.'},
+
+ /* ---- Room 3 ---- */
+ {id:'3.1', room:3, title:'Right tool?', type:'mc',
+  prompt:'When is a two-sample t-test the right tool?',
+  opts:['To compare the means of two independent groups',
+        'To compare the means of three or more groups',
+        'To check whether data follow a normal distribution',
+        'To compare the variances of many groups'],
+  ans:0,
+  why:'Two independent groups → two-sample t-test. Three or more groups → ANOVA.'},
+ {id:'3.2', formula:'ȳ = Σy / n &nbsp;&nbsp;&nbsp; s² = Σ(y − ȳ)² / (n − 1)', room:3, title:'Summary statistics', type:'num', data:'t',
+  prompt:'Compute the sample mean and sample variance for each machine.',
+  inputs:[{label:'ȳ₁', ans:250, tol:0.01},{label:'ȳ₂', ans:254, tol:0.01},{label:'s₁²', ans:5, tol:0.01},{label:'s₂²', ans:2.5, tol:0.01}],
+  why:'ȳ₁ = 1250/5 = 250, ȳ₂ = 1270/5 = 254. s₁² = (9+0+1+1+9)/4 = 5.0; s₂² = (1+4+4+1+0)/4 = 2.5.'},
+ {id:'3.3', formula:'s²ₚ = [(n₁ − 1)s₁² + (n₂ − 1)s₂²] / (n₁ + n₂ − 2)', room:3, title:'Pooled variance', type:'num', data:'t',
+  prompt:'Compute the pooled variance s²ₚ.',
+  inputs:[{label:'s²ₚ', ans:3.75, tol:0.01}],
+  why:'s²ₚ = (4·5.0 + 4·2.5)/8 = 30/8 = 3.75.'},
+ {id:'3.4', formula:'t₀ = (ȳ₁ − ȳ₂) / ( sₚ √(1/n₁ + 1/n₂) ) &nbsp;&nbsp;&nbsp; df = n₁ + n₂ − 2', room:3, title:'Test statistic', type:'num', data:'t',
+  prompt:'Compute the test statistic t₀ and its degrees of freedom.',
+  inputs:[{label:'t₀', ans:-3.266, tol:0.02, abs:true},{label:'df', ans:8, tol:0}],
+  why:'sₚ√(1/5 + 1/5) = √3.75 × √0.4 = √1.5 ≈ 1.225, so t₀ = −4/1.225 ≈ −3.27 with df = 5 + 5 − 2 = 8.'},
+ {id:'3.5', room:3, title:'Decision', type:'mc', data:'t',
+  prompt:'With α = 0.05 the critical value is t₀.₀₂₅,₈ = 2.306. What do you conclude?',
+  opts:['Fail to reject H₀; the machines have the same mean',
+        'Reject H₀; the mean fill weights of the two machines differ',
+        'Reject H₀; Machine 1 has a larger variance',
+        'No decision is possible without R'],
+  ans:1,
+  why:'|t₀| = 3.27 > 2.306, so reject H₀. Machine 2 fills about 4 g more on average. Note that failing to reject would not prove the means are equal.'},
+ {id:'3.6', room:3, title:'Read the R output', type:'mc', rout:true,
+  prompt:'The team checks the work in R. Based on the confidence interval in the output, which statement is correct?',
+  opts:['The interval contains 0, so the means do not differ',
+        'The interval does not contain 0, so the means differ at α = 0.05',
+        'The interval shows that 95% of bags weigh between 246.8 g and 252.8 g',
+        'The interval tells us nothing about the hypothesis test'],
+  ans:1,
+  why:'The 95% CI for μ₁ − μ₂ is (−6.82, −1.18). It excludes 0, which matches p = 0.011 < 0.05. If a CI for the difference includes 0, “no difference” is still plausible and the test does not reject H₀.'},
+ {id:'3.7', room:3, title:'Assumptions', type:'multi',
+  prompt:'Which assumptions does the pooled two-sample t-test make? Select all that apply.',
+  opts:['The two samples are independent','Each population is approximately normal','The two populations have equal variances','The two samples have equal sizes','The population variances are known'],
+  ans:[0,1,2],
+  why:'Pooled t: independent samples, normal populations, equal variances. Equal sample sizes and known variances are not required.'},
+ {id:'3.8', room:3, title:'Pooled or Welch?', type:'mc',
+  prompt:'What is the difference between the pooled and the Welch two-sample t-tests?',
+  opts:['Welch does not assume equal variances; pooled does',
+        'Pooled does not assume normality; Welch does',
+        'Welch is used for paired data',
+        'There is no difference; R gives the same answer for both'],
+  ans:0,
+  why:'Welch estimates each variance separately and adjusts the df. In R, t.test() runs Welch by default; var.equal = TRUE gives the pooled test.'},
+
+ /* ---- Room 4 ---- */
+ {id:'4.1', room:4, title:'Why not three t-tests?', type:'mc',
+  prompt:'Why do we use ANOVA instead of running a t-test for every pair of machines?',
+  opts:['Many t-tests inflate the chance of at least one false alarm (Type I error)',
+        't-tests cannot be used with weight data',
+        'ANOVA does not need any assumptions',
+        'ANOVA tells us exactly which machine is different'],
+  ans:0,
+  why:'With three machines there are three pairs. Each test at α = 0.05 adds false-alarm risk; ANOVA tests all means with one test at level α.'},
+ {id:'4.2', formula:'ȳᵢ. = Σⱼ yᵢⱼ / n &nbsp;&nbsp;&nbsp; ȳ.. = Σᵢ Σⱼ yᵢⱼ / N', room:4, title:'Means', type:'num', data:'anova',
+  prompt:'Compute each machine mean and the grand mean.',
+  inputs:[{label:'ȳ_A.', ans:250, tol:0.01},{label:'ȳ_B.', ans:253, tol:0.01},{label:'ȳ_C.', ans:256, tol:0.01},{label:'ȳ..', ans:253, tol:0.01}],
+  why:'ȳ_A. = 1000/4 = 250, ȳ_B. = 1012/4 = 253, ȳ_C. = 1024/4 = 256, ȳ.. = 3036/12 = 253.'},
+ {id:'4.3', formula:'SS_Treatments = n Σᵢ (ȳᵢ. − ȳ..)²', room:4, title:'Treatment sum of squares', type:'num', data:'anova',
+  prompt:'Compute the treatment sum of squares.',
+  inputs:[{label:'SS_Treatments', ans:72, tol:0.05}],
+  why:'4[(250−253)² + (253−253)² + (256−253)²] = 4(9 + 0 + 9) = 72.'},
+ {id:'4.4', formula:'SS_T = Σᵢ Σⱼ (yᵢⱼ − ȳ..)² &nbsp;&nbsp;&nbsp; SS_E = SS_T − SS_Treatments', room:4, title:'Total and error', type:'num', data:'anova',
+  prompt:'Compute the total sum of squares, then the error sum of squares.',
+  inputs:[{label:'SS_T', ans:98, tol:0.05},{label:'SS_E', ans:26, tol:0.05}],
+  why:'SS_T = 98, so SS_E = 98 − 72 = 26. Check: within each machine, Σ(yᵢⱼ − ȳᵢ.)² = 6 + 10 + 10 = 26.'},
+ {id:'4.5', formula:'df_Tr = a − 1 &nbsp;&nbsp; df_E = N − a &nbsp;&nbsp; MS = SS / df &nbsp;&nbsp; F₀ = MS_Treatments / MS_E', room:4, title:'Complete the ANOVA table', type:'num', data:'anova',
+  prompt:'Fill in the degrees of freedom, mean squares, and F₀.',
+  inputs:[{label:'df Treatments', ans:2, tol:0},{label:'df Error', ans:9, tol:0},{label:'MS_Treatments', ans:36, tol:0.05},{label:'MS_E', ans:2.889, tol:0.01},{label:'F₀', ans:12.46, tol:0.03}],
+  why:'df = a − 1 = 2 and N − a = 9. MS_Tr = 72/2 = 36, MS_E = 26/9 ≈ 2.89, F₀ = 36/2.89 ≈ 12.46.'},
+ {id:'4.6', room:4, title:'Decision', type:'mc', data:'anova',
+  prompt:'At α = 0.05, F₀.₀₅,₂,₉ = 4.26. What do you conclude?',
+  opts:['Fail to reject H₀; all machines fill the same',
+        'Reject H₀; at least one machine has a different mean fill weight',
+        'Reject H₀; all three machines differ from each other',
+        'Reject H₀; Machine C is the only one that differs'],
+  ans:1,
+  why:'F₀ = 12.46 > 4.26, so reject H₀. ANOVA says at least one mean differs; a follow-up such as Tukey’s HSD tells us which pairs.'},
+ {id:'4.7', formula:'SS_T = SS_Treatments + SS_E &nbsp;&nbsp; df_T = df_Tr + df_E &nbsp;&nbsp; MS = SS / df &nbsp;&nbsp; F₀ = MS_Treatments / MS_E', room:4, title:'Torn printout', type:'num', table:true,
+  prompt:'A coffee spill erased part of another ANOVA table. Fill in the missing cells.',
+  inputs:[{label:'MS_Treatments', ans:30, tol:0.05},{label:'df Error', ans:20, tol:0},{label:'SS_E', ans:100, tol:0.05},{label:'F₀', ans:6, tol:0.02}],
+  why:'MS_Tr = 90/3 = 30. df_E = 23 − 3 = 20. SS_E = 190 − 90 = 100 (also 20 × 5.0). F₀ = 30/5 = 6.0.'},
+ {id:'4.8', room:4, title:'Decision for the torn printout', type:'mc', table:true,
+  prompt:'For that table, F₀.₀₅,₃,₂₀ = 3.10. What do you conclude at α = 0.05?',
+  opts:['Reject H₀; at least one treatment mean differs','Fail to reject H₀','We need the p-value to decide','Reject H₀; the error variance is too large'],
+  ans:0,
+  why:'F₀ = 6.0 > 3.10, so reject H₀.'},
+
+ /* ---- Room 5 ---- */
+ {id:'5.1', formula:'df_Tr = a − 1 &nbsp;&nbsp; df_E = N − a &nbsp;&nbsp; df_T = N − 1 &nbsp;&nbsp; n = N / a (balanced)', room:5, title:'Read the design from the table', type:'num', rout5:true,
+  prompt:'The auditor hands you this R output from a balanced experiment. How many treatment levels, total observations, and replicates per treatment were used?',
+  inputs:[{label:'a (levels)', ans:5, tol:0},{label:'N (total)', ans:25, tol:0},{label:'n (per level)', ans:5, tol:0}],
+  why:'Treatment df = a − 1 = 4, so a = 5. Total df = 4 + 20 = 24 = N − 1, so N = 25. Balanced, so n = 25/5 = 5.'},
+ {id:'5.2', room:5, title:'Stars', type:'mc', rout5:true,
+  prompt:'What do the two stars (**) next to the p-value mean?',
+  opts:['p is below 0.001','p is between 0.001 and 0.01','p is between 0.01 and 0.05','p is between 0.05 and 0.1'],
+  ans:1,
+  why:'The signif. codes line maps ** to 0.001 < p ≤ 0.01. Here p = 0.00204, so H₀ is rejected at α = 0.05 and at α = 0.01.'},
+ {id:'5.3', room:5, title:'What is this plot for?', type:'mc', qq:true,
+  prompt:'The auditor shows a Q–Q plot of 30 bag weights from Machine D. What does a Q–Q plot like this check?',
+  opts:['Whether the data follow a normal distribution','Whether the treatment variances are equal','Whether the observations are independent over time','Whether the treatment means are equal'],
+  ans:0,
+  why:'The plot compares the sample quantiles to the quantiles a normal distribution would give. Points near the line suggest normality is reasonable.'},
+ {id:'5.4', room:5, title:'Read the pattern', type:'mc', qq:true,
+  prompt:'What does the pattern in this Q–Q plot suggest about the bag weights?',
+  opts:['They are approximately normal','They are right-skewed: a few bags are much heavier than expected','They are left-skewed: a few bags are much lighter than expected','They have heavy tails on both ends (S-shape)'],
+  ans:2,
+  why:'The points follow the line in the middle, but the smallest weights fall well below it on the left, so the plot bends like an upside-down bowl. That signals left skew: occasional very light bags, such as from a jam.'},
+ {id:'5.5', room:5, title:'Why Tukey?', type:'mc', tukey:true,
+  prompt:'What is the purpose of Tukey’s multiple-comparison procedure?',
+  opts:['To test whether the data are normal',
+        'To compare all pairs of treatment means while controlling the familywise Type I error rate',
+        'To choose the sample size before the experiment',
+        'To replace ANOVA when variances are unequal'],
+  ans:1,
+  why:'Tukey’s HSD checks every pair at once and keeps the chance of any false alarm across all pairs at α.'},
+ {id:'5.6', room:5, title:'Which pairs differ?', type:'multi', tukey:true,
+  prompt:'Using the 95% familywise confidence intervals, select every pair of machines whose means differ significantly.',
+  opts:['2–1','3–1','4–1','3–2','4–2','4–3'],
+  ans:[0,2,3,5],
+  why:'Intervals that do not contain 0 mark significant pairs: 2–1, 4–1, 3–2, and 4–3. The intervals for 3–1 and 4–2 cross 0.'},
+ {id:'5.7', room:5, title:'Read the power curve', type:'num', power:true,
+  prompt:'For the next study (3 machines, between.var = 4, within.var = 9, α = 0.05), what is the smallest number of bags per machine that gives power of at least 0.80?',
+  inputs:[{label:'n per machine', ans:12, tol:0}],
+  why:'Power first reaches 0.80 at n = 12 (power ≈ 0.80). power.anova.test gives n = 11.9, and we always round up to 12.'},
+ {id:'5.8', room:5, title:'Smaller differences', type:'mc', power:true,
+  prompt:'If the true machine means were closer together (smaller between.var), how would the required sample size change?',
+  opts:['It would decrease','It would stay the same','It would increase, because smaller differences are harder to detect','It would depend only on α'],
+  ans:2,
+  why:'Smaller differences are harder to detect, so the power curve shifts right and more observations are needed for the same power.'}
+];
+const DROP=['3.8','5.1','5.2'];
+const ITEMS = ITEMS_ALL.filter(it=>!DROP.includes(it.id));
+(function(){const c={};ITEMS.forEach(it=>{it.orig=it.id;c[it.room]=(c[it.room]||0)+1;it.id=it.room+'.'+c[it.room];});})();
+const BY_ID = {}; ITEMS.forEach(it => BY_ID[it.id] = it);
+const roomItems = r => ITEMS.filter(it => it.room === r);
+
+/* ---------------- scoring ---------------- */
+function st(id){ return S.items[id] || (S.items[id] = {tries:0, done:false, pts:0, revealed:false, val:null}); }
+function ptsFor(tries){ return Math.max(10 - 2*(tries-1), 2); }
+function roomScore(r){ return roomItems(r).reduce((a,it)=>a+(st(it.id).pts||0),0); }
+function roomDone(r){ return roomItems(r).every(it => st(it.id).done); }
+function unlocked(view){ if (INSTR || view <= 1) return view===0 || !!S.team.trim() || INSTR; for (let r=1; r<view; r++) if (!roomDone(r)) return false; return true; }
+const TOTAL = ITEMS.length*10;
+function total(){ return ITEMS.reduce((a,it)=>a+(st(it.id).pts||0),0); }
+
+/* ---------------- shared data blocks ---------------- */
+const TDATA = {m1:[247,250,249,251,253], m2:[253,256,252,255,254]};
+const ADATA = {A:[249,252,250,249], B:[251,255,252,254], C:[254,258,257,255]};
+const QQDATA = [249.1,249.9,249.4,251.9,246.9,251.3,250.6,245.4,250.3,251.3,252.4,249.6,251.3,251.3,251.4,250.9,251.4,251.6,252.2,252.1,244.8,250.8,250.8,251.8,251.5,248.7,251.7,249.6,250.1,249.2];
+const POWER = [[2,.109],[3,.192],[4,.279],[5,.365],[6,.448],[7,.525],[8,.596],[9,.659],[10,.714],[11,.762],[12,.804],[13,.839],[14,.869],[15,.894]];
+
+function dataTable(head, rows){
+  return '<div class="tablewrap"><table class="dtable"><thead><tr>'+head.map(h=>'<th>'+h+'</th>').join('')+'</tr></thead><tbody>'+
+    rows.map(r=>'<tr>'+r.map(c=>'<td>'+c+'</td>').join('')+'</tr>').join('')+'</tbody></table></div>';
+}
+function tBlock(){
+  return '<div class="datacard step"><h3>Bag weights (g), five bags per machine</h3>'+
+    dataTable(['Machine','Bag 1','Bag 2','Bag 3','Bag 4','Bag 5'],[['1'].concat(TDATA.m1),['2'].concat(TDATA.m2)])+
+    '<p class="hint">H₀: μ₁ = μ₂ &nbsp; vs. &nbsp; H₁: μ₁ ≠ μ₂, α = 0.05</p></div>';
+}
+function aBlock(){
+  return '<div class="datacard step"><h3>Bag weights (g), four bags per machine</h3>'+
+    dataTable(['Machine','Bag 1','Bag 2','Bag 3','Bag 4'],Object.keys(ADATA).map(k=>[k].concat(ADATA[k])))+
+    '<p class="hint">a = 3 machines, n = 4 bags each, N = 12.</p></div>';
+}
+function tornTable(){
+  return '<div class="step"><h3>The torn printout</h3><table class="atable"><thead><tr><th>Source</th><th>df</th><th>SS</th><th>MS</th><th>F₀</th></tr></thead><tbody>'+
+   '<tr><td>Treatments</td><td>3</td><td>90</td><td>?</td><td>?</td></tr>'+
+   '<tr><td>Error</td><td>?</td><td>?</td><td>5.0</td><td></td></tr>'+
+   '<tr><td>Total</td><td>23</td><td>190</td><td></td><td></td></tr></tbody></table></div>';
+}
+function rOut3(){
+  return '<div class="rcode">t.test(m1, m2, var.equal = TRUE)</div><div class="rout">\tTwo Sample t-test\n\ndata:  m1 and m2\nt = -3.266, df = 8, p-value = 0.01142\nalternative hypothesis: true difference in means is not equal to 0\n95 percent confidence interval:\n -6.824267 -1.175733\nsample estimates:\nmean of x mean of y \n      250       254 </div>';
+}
+function rOut5(){
+  return '<div class="rcode">summary(aov(y ~ as.factor(type), data = dat))</div><div class="rout">                Df Sum Sq Mean Sq F value  Pr(&gt;F)   \nas.factor(type)  4    472   118.0   6.211 0.00204 **\nResiduals       20    380    19.0                   \n---\nSignif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1</div>';
+}
+
+/* ---------------- SVG helpers ---------------- */
+function axes(W,H,pad,xs,ys,xt,yt,xl,yl){
+  const X = v => pad.l + (v-xs[0])/(xs[1]-xs[0])*(W-pad.l-pad.r);
+  const Y = v => H-pad.b - (v-ys[0])/(ys[1]-ys[0])*(H-pad.t-pad.b);
+  let g = '<line x1="'+pad.l+'" y1="'+(H-pad.b)+'" x2="'+(W-pad.r)+'" y2="'+(H-pad.b)+'" stroke="var(--muted)"/>'+
+          '<line x1="'+pad.l+'" y1="'+pad.t+'" x2="'+pad.l+'" y2="'+(H-pad.b)+'" stroke="var(--muted)"/>';
+  (xt||[]).forEach(t=>{ g += '<line x1="'+X(t)+'" y1="'+pad.t+'" x2="'+X(t)+'" y2="'+(H-pad.b)+'" stroke="var(--line)"/><text x="'+X(t)+'" y="'+(H-pad.b+16)+'" text-anchor="middle">'+t+'</text>'; });
+  (yt||[]).forEach(t=>{ g += '<line x1="'+pad.l+'" y1="'+Y(t)+'" x2="'+(W-pad.r)+'" y2="'+Y(t)+'" stroke="var(--line)"/><text x="'+(pad.l-6)+'" y="'+(Y(t)+4)+'" text-anchor="end">'+t+'</text>'; });
+  if (xl) g += '<text x="'+((pad.l+W-pad.r)/2)+'" y="'+(H-4)+'" text-anchor="middle">'+xl+'</text>';
+  if (yl) g += '<text transform="translate(13,'+((pad.t+H-pad.b)/2)+') rotate(-90)" text-anchor="middle">'+yl+'</text>';
+  return {g,X,Y};
+}
+function erf(x){const s=x<0?-1:1;x=Math.abs(x);const t=1/(1+0.3275911*x);const y=1-(((((1.061405429*t-1.453152027)*t)+1.421413741)*t-0.284496736)*t+0.254829592)*t*Math.exp(-x*x);return s*y;}
+const Phi = z => 0.5*(1+erf(z/Math.SQRT2));
+function qnorm(p){ // Acklam
+  const a=[-39.69683028665376,220.9460984245205,-275.9285104469687,138.357751867269,-30.66479806614716,2.506628277459239],
+  b=[-54.47609879822406,161.5858368580409,-155.6989798598866,66.80131188771972,-13.28068155288572],
+  c=[-0.007784894002430293,-0.3223964580411365,-2.400758277161838,-2.549732539343734,4.374664141464968,2.938163982698783],
+  d=[0.007784695709041462,0.3224671290700398,2.445134137142996,3.754408661907416];
+  const pl=0.02425; let q,r;
+  if(p<pl){q=Math.sqrt(-2*Math.log(p));return (((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5])/((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1);}
+  if(p>1-pl){q=Math.sqrt(-2*Math.log(1-p));return -(((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5])/((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1);}
+  q=p-0.5;r=q*q;return (((((a[0]*r+a[1])*r+a[2])*r+a[3])*r+a[4])*r+a[5])*q/(((((b[0]*r+b[1])*r+b[2])*r+b[3])*r+b[4])*r+1);
+}
+function quant7(sorted,p){const h=(sorted.length-1)*p,lo=Math.floor(h);return sorted[lo]+(h-lo)*((sorted[lo+1]??sorted[lo])-sorted[lo]);}
+
+/* ---- Room 1 simulator ---- */
+let simN = 2;
+function popSVG(){
+  const W=320,H=190,pad={l:36,r:10,t:12,b:36};
+  const A=axes(W,H,pad,[248,280],[0,0.18],[250,260,270,280],[],'Bag weight (g)','');
+  let d='M'+A.X(250)+','+A.Y(0);
+  for(let x=250;x<=280;x+=0.25) d+=' L'+A.X(x).toFixed(1)+','+A.Y(Math.exp(-(x-250)/6)/6).toFixed(1);
+  d+=' L'+A.X(280)+','+A.Y(0)+' Z';
+  return '<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Right-skewed population of bag weights">'+A.g+
+   '<path d="'+d+'" fill="var(--gold)" fill-opacity=".55" stroke="var(--ink)" stroke-width="1.5"/>'+
+   '<line x1="'+A.X(256)+'" y1="'+pad.t+'" x2="'+A.X(256)+'" y2="'+A.Y(0)+'" stroke="var(--ink)" stroke-dasharray="4 3"/>'+
+   '<text x="'+(A.X(256)+5)+'" y="'+(pad.t+12)+'">μ = 256</text></svg>';
+}
+function simSVG(n){
+  const reps=500, means=[];
+  for(let i=0;i<reps;i++){let s=0;for(let j=0;j<n;j++) s+=250-6*Math.log(1-Math.random());means.push(s/n);}
+  const lo=250,hi=272,bw=0.5,nb=(hi-lo)/bw,cnt=new Array(nb).fill(0);
+  means.forEach(m=>{const k=Math.floor((m-lo)/bw); if(k>=0&&k<nb) cnt[k]++;});
+  const dens=cnt.map(c=>c/(reps*bw)), sd=6/Math.sqrt(n), ymax=Math.max(0.45, Math.max(...dens)*1.1);
+  const W=520,H=230,pad={l:36,r:10,t:12,b:36};
+  const A=axes(W,H,pad,[lo,hi],[0,ymax],[250,255,260,265,270],[],'sample mean x̄ (g)','');
+  let bars=''; dens.forEach((v,k)=>{ if(v>0) bars+='<rect x="'+A.X(lo+k*bw).toFixed(1)+'" y="'+A.Y(v).toFixed(1)+'" width="'+(A.X(lo+bw)-A.X(lo)-0.6).toFixed(1)+'" height="'+(A.Y(0)-A.Y(v)).toFixed(1)+'" fill="var(--gold)" stroke="var(--ink)" stroke-width=".4"/>'; });
+  let d=''; for(let x=lo;x<=hi;x+=0.1){const y=Math.exp(-0.5*((x-256)/sd)**2)/(sd*Math.sqrt(2*Math.PI)); d+=(d?' L':'M')+A.X(x).toFixed(1)+','+A.Y(Math.min(y,ymax)).toFixed(1);}
+  return '<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Histogram of 500 sample means for n = '+n+'">'+A.g+bars+
+    '<path d="'+d+'" fill="none" stroke="var(--ink)" stroke-width="2"/>'+
+    '<text x="'+(W-pad.r)+'" y="'+(pad.t+12)+'" text-anchor="end">n = '+n+', 500 samples</text></svg>';
+}
+function room1Widget(){
+  return '<div class="step"><h3>Sampling simulator: Machine B</h3>'+
+   '<p>Machine B sometimes drops an extra candy, so its bag weights are <b>right-skewed</b> (μ = 256 g, σ = 6 g). Pick a sample size, then draw 500 samples and look at the 500 sample means. The black curve is a normal curve with mean 256 and SD 6/√n.</p>'+
+   '<div class="sim"><div class="mini"><div class="muted" style="font-size:14px;font-weight:600">Population of individual bags</div>'+popSVG()+'</div>'+
+   '<div class="mini"><div class="actions" style="margin-top:0">'+[2,10,30].map(n=>'<button class="btn small '+(n===simN?'':'ghost')+'" data-n="'+n+'">n = '+n+'</button>').join('')+
+   '<button class="btn small" id="simDraw">Draw 500 samples</button></div><div id="simOut" style="margin-top:8px">'+simSVG(simN)+'</div></div></div></div>';
+}
+
+/* ---- Room 2 power explorer ---- */
+let pex = {n:9, a:0.05};
+function pexCalc(){
+  const z={0.01:2.576,0.05:1.960,0.10:1.645}[pex.a], shift=3*Math.sqrt(pex.n)/6;
+  const beta=Phi(z-shift)-Phi(-z-shift);
+  return {beta, power:1-beta};
+}
+function pexHTML(){
+  const r=pexCalc();
+  return '<div class="pwgrid"><div><div class="muted">α (Type I)</div><div class="pwnum">'+fmt(pex.a,2)+'</div></div>'+
+    '<div><div class="muted">β (Type II)</div><div class="pwnum">'+fmt(r.beta,2)+'</div></div>'+
+    '<div><div class="muted">Power 1 − β</div><div class="pwnum">'+fmt(r.power,2)+'</div></div>'+
+    '<div><div class="muted">Sample size n</div><div class="pwnum">'+pex.n+'</div></div></div>'+
+    '<div class="pbar" aria-hidden="true"><span style="width:'+(r.power*100).toFixed(1)+'%"></span></div>';
+}
+function room2Widget(){
+  return '<div class="step"><h3>Power explorer</h3>'+
+   '<p>Suppose the line has truly drifted to μ = 253 g (σ = 6 g), so H₀: μ = 250 is false. How often does the alarm catch it?</p>'+
+   '<div class="grid-in"><label class="in"><span class="l">Significance level α</span><select id="pexA">'+
+   [0.01,0.05,0.10].map(a=>'<option value="'+a+'"'+(a===pex.a?' selected':'')+'>'+fmt(a,2)+'</option>').join('')+'</select></label>'+
+   '<label class="in"><span class="l">Sample size n: <b id="pexNv">'+pex.n+'</b></span><input type="range" id="pexN" min="2" max="40" value="'+pex.n+'"></label></div>'+
+   '<div id="pexOut">'+pexHTML()+'</div></div>';
+}
+
+/* ---- Room 5 plots ---- */
+function qqSVG(){
+  const y=QQDATA.slice().sort((a,b)=>a-b), n=y.length;
+  const x=y.map((_,i)=>qnorm((i+1-0.375)/(n+0.25)));
+  const q1=quant7(y,.25),q3=quant7(y,.75),z1=qnorm(.25),z3=qnorm(.75),sl=(q3-q1)/(z3-z1),ic=q1-sl*z1;
+  const W=420,H=320,pad={l:50,r:12,t:12,b:42};
+  const A=axes(W,H,pad,[-2.5,2.5],[243,254],[-2,-1,0,1,2],[244,246,248,250,252,254],'Theoretical quantiles','Bag weight (g)');
+  let pts=''; x.forEach((xi,i)=>pts+='<circle cx="'+A.X(xi).toFixed(1)+'" cy="'+A.Y(y[i]).toFixed(1)+'" r="4.5" fill="var(--gold)" stroke="var(--ink)" stroke-width=".8"/>');
+  return '<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Q-Q plot of 30 bag weights">'+A.g+
+   '<line x1="'+A.X(-2.5)+'" y1="'+A.Y(ic-2.5*sl)+'" x2="'+A.X(2.5)+'" y2="'+A.Y(ic+2.5*sl)+'" stroke="var(--ink)" stroke-width="1.6"/>'+pts+'</svg>';
+}
+function tukeySVG(){
+  const rows=[['2–1',6.0],['3–1',1.2],['4–1',7.4],['3–2',-4.8],['4–2',1.4],['4–3',6.2]], h=3.62;
+  const W=440,H=290,pad={l:52,r:14,t:12,b:42}, rowH=(H-pad.t-pad.b)/rows.length;
+  const A=axes(W,H,pad,[-10,12],[0,1],[-10,-5,0,5,10],[],'Difference in mean fill (g)','');
+  let g='<line x1="'+A.X(0)+'" y1="'+pad.t+'" x2="'+A.X(0)+'" y2="'+(H-pad.b)+'" stroke="var(--ink)" stroke-dasharray="4 3"/>';
+  rows.forEach(([lab,d],i)=>{const yy=pad.t+rowH*(i+0.5);
+    g+='<line x1="'+A.X(d-h)+'" y1="'+yy+'" x2="'+A.X(d+h)+'" y2="'+yy+'" stroke="var(--ink)" stroke-width="2"/>'+
+       '<line x1="'+A.X(d-h)+'" y1="'+(yy-6)+'" x2="'+A.X(d-h)+'" y2="'+(yy+6)+'" stroke="var(--ink)" stroke-width="2"/>'+
+       '<line x1="'+A.X(d+h)+'" y1="'+(yy-6)+'" x2="'+A.X(d+h)+'" y2="'+(yy+6)+'" stroke="var(--ink)" stroke-width="2"/>'+
+       '<circle cx="'+A.X(d)+'" cy="'+yy+'" r="4" fill="var(--ink)"/>'+
+       '<text x="'+(pad.l-8)+'" y="'+(yy+4)+'" text-anchor="end">'+lab+'</text>';});
+  return '<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Tukey 95 percent familywise confidence intervals for six pairs">'+A.g+g+'</svg>';
+}
+function powerSVG(){
+  const W=440,H=290,pad={l:48,r:14,t:12,b:42};
+  const A=axes(W,H,pad,[1,16],[0,1],[2,4,6,8,10,12,14,16],[0,0.2,0.4,0.6,0.8,1],'n (bags per machine)','Power');
+  let d='',pts=''; POWER.forEach(([n,p],i)=>{d+=(i?' L':'M')+A.X(n).toFixed(1)+','+A.Y(p).toFixed(1); pts+='<circle cx="'+A.X(n).toFixed(1)+'" cy="'+A.Y(p).toFixed(1)+'" r="3.5" fill="var(--gold)" stroke="var(--ink)" stroke-width=".8"/>';});
+  return '<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Power curve against sample size">'+A.g+
+   '<line x1="'+pad.l+'" y1="'+A.Y(0.8)+'" x2="'+(W-pad.r)+'" y2="'+A.Y(0.8)+'" stroke="var(--ink)" stroke-dasharray="4 3"/>'+
+   '<text x="'+(W-pad.r-4)+'" y="'+(A.Y(0.8)-6)+'" text-anchor="end">target 0.80</text>'+
+   '<path d="'+d+'" fill="none" stroke="var(--ink)" stroke-width="2"/>'+pts+'</svg>';
+}
+
+/* ---------------- item rendering ---------------- */
+function itemHTML(it){
+  const s=st(it.id), done=s.done, v=s.val;
+  let body='';
+  if(it.type==='mc'){
+    body='<fieldset><legend class="sr">'+esc(it.title)+'</legend>'+it.opts.map((o,i)=>{
+      const cls=done?(i===it.ans?' right':''):'';
+      return '<label class="choice'+cls+'"><input type="radio" name="q'+it.id+'" value="'+i+'"'+(v===i||(done&&i===it.ans)?' checked':'')+(done?' disabled':'')+'><span>'+o+'</span></label>';}).join('')+'</fieldset>';
+  } else if(it.type==='multi'){
+    const cur=Array.isArray(v)?v:[];
+    body='<fieldset><legend class="sr">'+esc(it.title)+'</legend>'+it.opts.map((o,i)=>{
+      const on=done?it.ans.includes(i):cur.includes(i);
+      return '<label class="choice'+(done&&on?' right':'')+'"><input type="checkbox" name="q'+it.id+'" value="'+i+'"'+(on?' checked':'')+(done?' disabled':'')+'><span>'+o+'</span></label>';}).join('')+'</fieldset>';
+  } else if(it.type==='sel'){
+    const cur=Array.isArray(v)?v:[];
+    body='<table class="vtable">'+it.rows.map((r,i)=>{const val=done?r[1]:(cur[i]||'');
+      return '<tr><td>'+r[0]+'</td><td class="num"><select data-r="'+i+'" aria-label="'+esc(r[0])+'"'+(done?' disabled':'')+'><option value="">Choose…</option>'+
+        it.opts.map(o=>'<option'+(o===val?' selected':'')+'>'+o+'</option>').join('')+'</select></td></tr>';}).join('')+'</table>';
+  } else if(it.type==='num'){
+    const cur=Array.isArray(v)?v:[];
+    body='<div class="grid-in">'+it.inputs.map((inp,i)=>{const val=done?(s.revealed?String(inp.ans):(cur[i]??'')):(cur[i]??'');
+      return '<label class="in"><span class="l">'+subs(inp.label)+'</span><input inputmode="decimal" data-i="'+i+'" value="'+esc(val)+'"'+(done?' disabled class="ok"':'')+'></label>';}).join('')+'</div>';
+  }
+  const showReveal=!done && (INSTR || s.tries>=3);
+  const fb=done?(s.revealed?'<div class="feedback no">Answer revealed: 0 points.</div>':'<div class="feedback ok">Correct: '+s.pts+' points.</div>'):(s.tries?'<div class="feedback no">Not yet. Attempt '+s.tries+'; next correct answer is worth '+ptsFor(s.tries+1)+' points.</div>':'');
+  return '<section class="step'+(done?' solved':'')+'" id="it'+it.id.replace('.','_')+'" data-id="'+it.id+'">'+
+    '<span class="pts">'+(done?s.pts:ptsFor(s.tries+1))+' / 10</span><h3>Q'+it.id+'. '+it.title+'</h3><p>'+it.prompt+'</p>'+(it.formula?'<div class="formula"><span class="fl">Formula</span>'+subs(it.formula)+'</div>':'')+body+
+    '<div class="actions">'+(done?'':'<button class="btn small" data-act="check">Check</button>')+(showReveal?'<button class="btn small ghost" data-act="reveal">Show answer</button>':'')+'</div>'+
+    fb+(done?'<div class="callout" style="margin-bottom:0"><b>Why: </b>'+it.why+'</div>':'')+'</section>';
+}
+function readVal(it,el){
+  if(it.type==='mc'){const c=el.querySelector('input:checked');return c?Number(c.value):null;}
+  if(it.type==='multi'){return [...el.querySelectorAll('input:checked')].map(c=>Number(c.value));}
+  if(it.type==='sel'){return [...el.querySelectorAll('select')].map(x=>x.value);}
+  if(it.type==='num'){return [...el.querySelectorAll('input')].map(x=>x.value);}
+}
+function numOk(inp,raw){
+  const t=String(raw).trim().replace(/−/g,'-').replace(/,/g,'');
+  if(t==='') return false; const x=Number(t); if(!isFinite(x)) return false;
+  const a=inp.abs?Math.abs(x):x, b=inp.abs?Math.abs(inp.ans):inp.ans;
+  return Math.abs(a-b)<=inp.tol+1e-9;
+}
+function grade(it,val){
+  if(it.type==='mc') return val===it.ans;
+  if(it.type==='multi') return val.length===it.ans.length && it.ans.every(a=>val.includes(a));
+  if(it.type==='sel') return it.rows.every((r,i)=>val[i]===r[1]);
+  if(it.type==='num') return it.inputs.every((inp,i)=>numOk(inp,val[i]));
+}
+function incomplete(it,val){
+  if(it.type==='mc') return val===null;
+  if(it.type==='multi') return val.length===0;
+  if(it.type==='sel') return val.some(x=>!x);
+  if(it.type==='num') return val.some(x=>String(x).trim()==='');
+}
+
+/* ---------------- views ---------------- */
+function stepper(){
+  const labels=['Briefing'].concat(ROOMS.map(r=>r.n+'. '+r.short)).concat(['Summary']);
+  $('stepper').innerHTML=labels.map((l,i)=>{
+    const ok=i===0||unlocked(i), done=(i>=1&&i<=5&&roomDone(i));
+    return '<li><button data-v="'+i+'"'+(i===S.view?' aria-current="step"':'')+(ok?'':' disabled')+' class="'+(done?'done':'')+'">'+l+'</button></li>';}).join('');
+}
+function briefing(){
+  return '<div class="panel"><h2>Before the auditor arrives</h2>'+
+   '<div class="memo"><div class="from">From: Plant manager</div>'+
+   '<p>Thanks to your ANOVA work, the light-bag problem is fixed. Now the auditor arrives next week, and she always asks the same kinds of questions. Before I sign off, I need you to clear five rooms of the factory. Each room unlocks the next.</p></div>'+
+   '<ol class="plan">'+ROOMS.map(r=>'<li><b>'+r.title.split(': ')[1]+'</b>: '+r.topic+'</li>').join('')+'</ol>'+
+   '<div class="callout"><b>Scoring.</b> Each question is worth 10 points. Each extra check costs 2 points (minimum 2 for a correct answer). After three wrong checks you may reveal the answer for 0 points so you can keep moving. Calculators and notes are fine; work as a team of three.</div>'+
+   '<div class="field"><label for="team">Team name</label><input id="team" value="'+esc(S.team)+'" placeholder="e.g., The Sugar Inspectors" autocomplete="off"></div>'+
+   '<div class="actions"><button class="btn" id="btnGo"'+(S.team.trim()||INSTR?'':' disabled')+'>Enter Room 1</button></div></div>';
+}
+function roomView(r){
+  const R=ROOMS[r-1];
+  let intro='', side='';
+  if(r===1) intro=room1Widget();
+  if(r===2) intro=room2Widget();
+  if(r===3) intro=tBlock();
+  if(r===4) intro=aBlock();
+  const items=roomItems(r).map(it=>{
+    let pre='';
+    if(it.orig==='3.6') pre=rOut3();
+    if(it.orig==='4.7') pre=tornTable();
+    if(it.orig==='5.1') pre=rOut5();
+    if(it.orig==='5.3') pre='<div class="step mini plotcard"><h3>Machine D: Q–Q plot of 30 bag weights</h3>'+qqSVG()+'</div>';
+    if(it.orig==='5.5') pre='<div class="step mini plotcard"><h3>Four machines: Tukey 95% familywise intervals</h3><div class="rcode">plot(TukeyHSD(aov4))</div>'+tukeySVG()+'</div>';
+    if(it.orig==='5.7') pre='<div class="step mini plotcard"><h3>Power curve: 3 machines, between.var = 4, within.var = 9</h3>'+powerSVG()+'</div>';
+    return pre+itemHTML(it);
+  }).join('');
+  const next = r<5 ? 'Enter Room '+(r+1) : 'See your summary card';
+  return '<div class="panel"><h2>'+R.title+'</h2><p class="muted">'+R.topic+' · Room score: <b>'+roomScore(r)+'</b> / '+roomItems(r).length*10+'</p></div>'+
+    intro+items+
+    '<div class="actions" style="margin-bottom:24px"><button class="btn" id="btnNext"'+(roomDone(r)||INSTR?'':' disabled')+'>'+next+'</button>'+
+    (roomDone(r)?'':'<span class="muted">Answer every question in this room to unlock the next one.</span>')+'</div>';
+}
+function summary(){
+  const mins=S.startedAt?Math.round((Date.now()-S.startedAt)/60000):0, d=new Date();
+  return '<div class="card"><div class="card-head"><div><div style="font-size:13px;opacity:.8">Exam 1 review report</div><h2>'+esc(S.team||'Team')+'</h2></div><div class="score">'+total()+'<span style="font-size:18px;color:#F3EEE6"> / '+TOTAL+'</span></div></div>'+
+   '<div class="card-body"><table class="atable"><thead><tr><th>Room</th><th>Score</th><th>Revealed</th></tr></thead><tbody>'+
+   ROOMS.map(R=>{const its=roomItems(R.n);return '<tr><td>'+R.title.split(': ')[1]+'</td><td>'+roomScore(R.n)+' / '+its.length*10+'</td><td>'+its.filter(it=>st(it.id).revealed).length+'</td></tr>';}).join('')+
+   '</tbody></table><h3>Questions to review again</h3><p>'+(ITEMS.filter(it=>st(it.id).revealed||(st(it.id).done&&st(it.id).pts<10)).map(it=>'Q'+it.id).join(', ')||'None. Nice work.')+'</p></div>'+
+   '<div class="card-foot"><span>ISE 8110 · Exam 1 review</span><span>'+d.toLocaleDateString()+' · about '+mins+' min</span></div></div>'+
+   '<p class="muted" style="text-align:center">Share your summary card with your instructor.</p>';
+}
+function render(){
+  stepper();
+  const v=S.view;
+  $('main').innerHTML = v===0?briefing():(v===6?summary():roomView(v));
+  bind();
+}
+function go(v){ if(v!==0 && !unlocked(v)) return; S.view=v; save(); render(); window.scrollTo(0,0); }
+
+/* ---------------- events ---------------- */
+function bind(){
+  document.querySelectorAll('#stepper button').forEach(b=>b.onclick=()=>go(Number(b.dataset.v)));
+  const team=$('team'); if(team) team.oninput=()=>{S.team=team.value;save();$('btnGo').disabled=!S.team.trim()&&!INSTR;};
+  const g=$('btnGo'); if(g) g.onclick=()=>{if(!S.startedAt)S.startedAt=Date.now();save();go(1);};
+  const nx=$('btnNext'); if(nx) nx.onclick=()=>go(S.view+1);
+  document.querySelectorAll('section.step[data-id]').forEach(sec=>{
+    const it=BY_ID[sec.dataset.id];
+    sec.querySelectorAll('[data-act]').forEach(b=>b.onclick=()=>{
+      const s=st(it.id);
+      if(b.dataset.act==='reveal'){ s.done=true; s.revealed=true; s.pts=0; save(); refresh(sec,it); return; }
+      const val=readVal(it,sec); s.val=val;
+      if(incomplete(it,val)){ let f=sec.querySelector('.feedback'); if(!f){f=document.createElement('div');sec.querySelector('.actions').after(f);} f.className='feedback no'; f.textContent='Answer every part before checking.'; return; }
+      s.tries++;
+      if(grade(it,val)){ s.done=true; s.pts=ptsFor(s.tries); }
+      save(); refresh(sec,it);
+    });
+  });
+  // room widgets
+  document.querySelectorAll('[data-n]').forEach(b=>b.onclick=()=>{simN=Number(b.dataset.n);document.querySelectorAll('[data-n]').forEach(x=>x.classList.toggle('ghost',Number(x.dataset.n)!==simN));$('simOut').innerHTML=simSVG(simN);});
+  const sd=$('simDraw'); if(sd) sd.onclick=()=>{$('simOut').innerHTML=simSVG(simN);};
+  const pa=$('pexA'); if(pa) pa.onchange=()=>{pex.a=Number(pa.value);$('pexOut').innerHTML=pexHTML();};
+  const pn=$('pexN'); if(pn) pn.oninput=()=>{pex.n=Number(pn.value);$('pexNv').textContent=pex.n;$('pexOut').innerHTML=pexHTML();};
+}
+function refresh(sec,it){
+  const tmp=document.createElement('div'); tmp.innerHTML=itemHTML(it); const ns=tmp.firstElementChild;
+  sec.replaceWith(ns); bind(); stepper();
+  const v=S.view; if(v>=1&&v<=5){ const p=document.querySelector('.panel p.muted'); if(p) p.innerHTML=ROOMS[v-1].topic+' · Room score: <b>'+roomScore(v)+'</b> / '+roomItems(v).length*10;
+    const nx=$('btnNext'); if(nx){nx.disabled=!(roomDone(v)||INSTR); const m=nx.nextElementSibling; if(roomDone(v)&&m) m.remove();} }
+}
+$('btnRestart').onclick=()=>{ if(confirm('Start over? This clears your team’s answers on this device.')){ S={team:'',view:0,items:{},startedAt:null}; save(); render(); } };
+if(INSTR){ const bn=document.createElement('div'); bn.className='wrap'; bn.innerHTML='<div class="callout" style="margin:8px 0"><b>Instructor version.</b> Every room is open, and each question has a Show answer button. Progress here is saved separately from the student version.</div>'; document.querySelector('header.top').after(bn); }
+if(!unlocked(S.view)) S.view=0;
+render();
+})();
+
+</script>
+</body>
+</html>
