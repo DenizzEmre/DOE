@@ -1,0 +1,455 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Popcorn Problem</title>
+<link href="https://api.fontshare.com/v2/css?f[]=satoshi@700,500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --gold:#FDB719; --black:#1a1a1a; --ink:#2b2b2b; --muted:#666;
+    --tan:#f6ecd6; --line:#d9d9d9; --blue:#2a6fa8; --red:#b3261e; --green:#2e7d32;
+    --A:#f3d98b; --B:#f4b9a8; --C:#b9d3ee; --D:#c9e4c5;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:#fff;color:var(--ink);
+       font-family:Aptos,"Segoe UI",system-ui,-apple-system,Helvetica,Arial,sans-serif;font-size:19px;line-height:1.45}
+  h1,h2,h3{font-family:Satoshi,Aptos,"Segoe UI",sans-serif;font-weight:700;color:var(--black);margin:0 0 .4em}
+  h1{font-size:2.4em} h2{font-size:1.75em;font-weight:500} h3{font-size:1.1em}
+  .wrap{max-width:1180px;margin:0 auto;padding:28px 32px 120px}
+  header.top{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:18px}
+  .steps{display:flex;gap:6px;flex-wrap:wrap}
+  .steps button{border:1px solid var(--line);background:#fff;border-radius:4px;padding:6px 12px;font:inherit;font-size:.8em;cursor:pointer;color:var(--muted)}
+  .steps button.on{background:var(--black);color:#fff;border-color:var(--black)}
+  .steps button.done{border-color:var(--gold);color:var(--black)}
+  footer{position:fixed;left:0;right:0;bottom:0;height:56px;background:var(--gold);display:flex;align-items:center;justify-content:space-between;padding:0 32px;z-index:5}
+  footer .brand{font-family:Georgia,serif;font-size:1.3em;color:var(--black)}
+  footer .nav button{font:inherit;font-weight:600;background:var(--black);color:#fff;border:0;border-radius:4px;padding:8px 18px;margin-left:8px;cursor:pointer}
+  footer .nav button:disabled{opacity:.35;cursor:default}
+  section{display:none} section.on{display:block}
+  .time{font-size:.8em;color:var(--muted);font-weight:500;margin-left:8px}
+  .callout{background:var(--tan);padding:12px 16px;border-radius:3px;margin:14px 0}
+  .task{border-left:4px solid var(--gold);padding:8px 16px;margin:16px 0;background:#fffaf0}
+  .task b.lbl{display:block;font-size:.8em;letter-spacing:.06em;text-transform:uppercase;color:#8a6500}
+  ul.lead{padding-left:1.1em} ul.lead li{margin:.35em 0}
+  .btn{font:inherit;font-weight:600;background:#fff;border:2px solid var(--black);border-radius:4px;padding:7px 16px;cursor:pointer;margin:6px 8px 6px 0}
+  .btn:hover{background:var(--gold)}
+  .btn.go{background:var(--black);color:#fff}
+  .btn.go:hover{background:var(--gold);color:var(--black)}
+  .reveal{display:none;margin-top:10px} .reveal.on{display:block;animation:fade .35s}
+  @keyframes fade{from{opacity:0}to{opacity:1}}
+  table{border-collapse:collapse;margin:8px 0}
+  th,td{padding:6px 12px;text-align:center;border-bottom:1px solid var(--line)}
+  th{font-weight:600;border-bottom:2px solid var(--black)}
+  td.l,th.l{text-align:left}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:28px}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+  @media (max-width:900px){.grid2,.grid3{grid-template-columns:1fr}}
+  .plan{border:1px solid var(--line);border-radius:4px;padding:12px}
+  .plan.pick{outline:3px solid var(--green)}
+  .batchrow{display:flex;gap:8px;justify-content:center}
+  .col{display:flex;flex-direction:column;gap:4px;align-items:center}
+  .col small{color:var(--muted);font-size:.7em}
+  .cell{width:34px;height:30px;border-radius:3px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85em;transition:all .3s}
+  .A{background:var(--A)} .B{background:var(--B)} .C{background:var(--C)} .D{background:var(--D)}
+  .check{margin:8px 0}
+  .check input,.check .btn{vertical-align:middle;margin-left:6px}
+  .check .fb{margin-left:6px}
+  .check input{font:inherit;width:110px;padding:4px 8px;border:1px solid #999;border-radius:3px}
+  .fb{font-weight:600;font-size:.9em}
+  .good{color:var(--green)} .bad{color:var(--red)}
+  .hl{background:#fff1c2}
+  .bar{display:flex;height:44px;border-radius:3px;overflow:hidden;margin:10px 0;color:#fff;font-weight:700}
+  .bar div{display:flex;align-items:center;justify-content:center;transition:width .8s;white-space:nowrap}
+  .muted{color:var(--muted)}
+  .summary{border:2px solid var(--black);border-radius:4px;padding:18px 22px}
+  .summary li{margin:.45em 0}
+  .bh{position:relative;display:inline-block}
+  .bh::after{content:"^";position:absolute;left:50%;transform:translateX(-50%);top:-.62em;font-size:.85em}
+  .eq{font-family:"Cambria Math",Cambria,Georgia,serif;font-size:1.05em}
+  /* illustrations */
+  .scene{display:flex;gap:18px;flex-wrap:wrap;align-items:flex-end;margin:12px 0}
+  .mw{text-align:center;font-size:.8em;color:var(--muted)}
+  .mw svg{display:block}
+  .mw.on .glow{fill:#ffe08a}
+  .mw.on svg{animation:hum .18s infinite alternate}
+  @keyframes hum{from{transform:translateX(-1px)}to{transform:translateX(1px)}}
+  .bags{display:flex;gap:14px;flex-wrap:wrap;margin:10px 0}
+  .bag{width:120px;border-radius:6px 6px 3px 3px;padding:10px 8px;text-align:center;font-weight:700;font-size:.8em;border:2px solid rgba(0,0,0,.15)}
+  .bag .letter{display:block;font-family:Satoshi,sans-serif;font-size:2em;line-height:1.1}
+  td.k{min-width:62px;position:relative}
+  td.k.pop{animation:pop .35s}
+  @keyframes pop{0%{transform:scale(1.5);background:#fff1c2}100%{transform:scale(1)}}
+  .burst{position:absolute;left:50%;top:0;pointer-events:none;animation:burst .7s forwards;font-size:1.2em}
+  @keyframes burst{from{opacity:1;transform:translate(-50%,0)}to{opacity:0;transform:translate(-50%,-34px)}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="muted" style="font-size:.85em">ISE 8110 · Blocking game</div>
+    <nav class="steps" id="steps"></nav>
+  </header>
+
+  <!-- 0 INTRO -->
+  <section data-title="Start">
+    <h1>The Popcorn Problem</h1>
+    <p style="font-size:1.15em">Campus Dining wants to stock <b>one popcorn brand</b> in every residence hall. The goal: the fewest <b>unpopped kernels</b> per bag.</p>
+    <div class="bags" id="bagsIntro"></div>
+    <ul class="lead">
+      <li><b>Response:</b> number of unpopped kernels left in the bag (lower is better).</li>
+      <li><b>The catch:</b> every residence hall has its own microwave. Some are new, some are older, and their power differs.</li>
+      <li><b>Budget:</b> 20 bags. Each microwave can pop 4 bags before the testing window closes.</li>
+    </ul>
+    <div class="scene" id="mwIntro"></div>
+    <div class="callout"><b>How we play:</b> each group answers on paper. When every group is ready, we reveal on screen. Five rounds: Diagnose, Design, Analyze, Random Microwaves, and Why Microwaves Differ.</div>
+  </section>
+
+  <!-- 1 DIAGNOSE -->
+  <section data-title="1 · Diagnose">
+    <h2>Round 1 · The roommate test</h2>
+    <p>Four roommates each popped one brand in the microwave on their own floor, then counted the unpopped kernels.</p>
+    <table>
+      <tr><th class="l">Brand</th><th>Microwave used</th><th>Unpopped kernels</th></tr>
+      <tr><td class="l">Brand A</td><td>Microwave 3</td><td>50</td></tr>
+      <tr><td class="l">Brand B</td><td>Microwave 2</td><td>35</td></tr>
+      <tr><td class="l">Brand C</td><td>Microwave 5</td><td>37</td></tr>
+      <tr><td class="l">Brand D</td><td>Microwave 4</td><td>45</td></tr>
+    </table>
+    <p>The roommates tell Dining: "Buy <b>Brand B</b>. It's the clear winner."</p>
+    <div class="task"><b class="lbl">Group task</b>
+      1. Do you agree that Brand B is the best brand? <br>
+      2. Name two reasons Brand B could look best even if it is not the best brand.
+    </div>
+    <button class="btn" data-reveal="r1">Reveal</button>
+    <div class="reveal" id="r1">
+      <ul class="lead">
+        <li><b>Brand and microwave are tangled together.</b> Each brand was popped in a different microwave, so a difference in kernels could come from the brand, the microwave, or both. We cannot separate them.</li>
+        <li><b>One bag per brand.</b> With no replication, we have no estimate of bag-to-bag noise.</li>
+      </ul>
+      <div class="callout">Keep Brand B and Microwave 2 in mind. We come back to them in Round 3.</div>
+    </div>
+  </section>
+
+  <!-- 2 DESIGN -->
+  <section data-title="2 · Design">
+    <h2>Round 2 · Pick the plan</h2>
+    <p>Dining proposes three ways to use the 20 bags. Each column is one microwave (4 bags). Letters are brands.</p>
+    <div class="grid3" id="plans"></div>
+    <div class="task"><b class="lbl">Group task</b>
+      1. Which plan would you approve? <br>
+      2. For each plan you reject, write one sentence on what goes wrong.
+    </div>
+    <button class="btn" data-reveal="r2">Reveal</button>
+    <div class="reveal" id="r2">
+      <ul class="lead">
+        <li><b>Plan 1 (fully random):</b> random, but by chance some microwaves never see some brands. Microwave differences end up mixed into the error.</li>
+        <li><b>Plan 2 (one brand per microwave):</b> the same problem as Round 1. Brand and microwave cannot be separated.</li>
+        <li><b>Plan 3 (RCBD):</b> every brand is popped once in every microwave, so brands are compared <i>within</i> the same microwave.</li>
+      </ul>
+      <div class="callout"><b>Blocks:</b> microwaves. <b>Complete:</b> all 4 brands in each microwave. <b>Randomized:</b> the popping order is random inside each microwave. Click below to randomize the order for Plan 3.</div>
+      <button class="btn" id="shuffle">Randomize popping order within each microwave</button>
+    </div>
+  </section>
+
+  <!-- 3 ANALYZE -->
+  <section data-title="3 · Analyze">
+    <h2>Round 3 · Pop the bags</h2>
+    <p>Dining ran Plan 3. Hit the button to pop all 20 bags.</p>
+    <div class="scene" id="mwRun"></div>
+    <button class="btn go" id="popBtn">Pop the bags</button>
+    <div id="datatable"></div>
+    <div id="afterPop" style="display:none">
+      <p class="muted" style="font-size:.9em">a = 4 brands, b = 5 microwaves, N = 20. Total sum of squares: <b>SS<sub>T</sub> = <span id="sst"></span></b></p>
+
+      <div class="task"><b class="lbl">Group task · Part A</b>
+        Use the row and column means to compute:
+        <div class="eq" style="margin:8px 0">SS<sub>Brands</sub> = b Σ (ȳ<sub>i·</sub> − ȳ<sub>··</sub>)² &nbsp;&nbsp;&nbsp; SS<sub>Microwaves</sub> = a Σ (ȳ<sub>·j</sub> − ȳ<sub>··</sub>)²</div>
+        <div class="check">SS<sub>Brands</sub> = <input id="in_str" inputmode="decimal"> <button class="btn" data-check="str">Check</button><span class="fb" id="fb_str"></span></div>
+        <div class="check">SS<sub>Microwaves</sub> = <input id="in_sbl" inputmode="decimal"> <button class="btn" data-check="sbl">Check</button><span class="fb" id="fb_sbl"></span></div>
+      </div>
+
+      <div class="task"><b class="lbl">Group task · Part B</b>
+        Two analysts look at the same data. Analyst 1 ignores the microwaves (one-way ANOVA). Analyst 2 includes them as blocks (RCBD). Before we reveal: <b>which numbers in the ANOVA table will change, and which will stay the same?</b>
+      </div>
+      <button class="btn" data-reveal="r3">Reveal both ANOVA tables</button>
+      <div class="reveal" id="r3">
+        <div class="grid2">
+          <div><h3>Analyst 1 · Ignore microwaves</h3><div id="aov1"></div></div>
+          <div><h3>Analyst 2 · Block on microwaves</h3><div id="aov2"></div></div>
+        </div>
+        <ul class="lead">
+          <li><b>Same:</b> SS<sub>Brands</sub> is identical in both tables. The design is balanced, so blocking does not change the brand comparison itself.</li>
+          <li><b>Changed:</b> the microwave variability moved out of the error. MSE drops from <span id="mse1"></span> to <span id="mse2"></span>.</li>
+          <li><b>Result:</b> Analyst 1 sees no brand effect (p = <span id="p1"></span>). Analyst 2 finds one (p = <span id="p2"></span>).</li>
+        </ul>
+        <div class="task"><b class="lbl">Back to Round 1</b> Which brand has the fewest unpopped kernels on average? Which microwave is the strongest? Why did Brand B look like the winner?</div>
+        <button class="btn" data-reveal="r3b">Reveal</button>
+        <div class="reveal" id="r3b">
+          <div class="callout"><b>Brand C</b> has the fewest unpopped kernels on average (<span id="mC"></span>). Brand B got lucky: the roommate popped it in <b>Microwave 2</b>, the most powerful one (microwave mean <span id="mb2"></span> kernels). The roommates were looking at a microwave effect.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4 RANDOM MICROWAVES -->
+  <section data-title="4 · Random microwaves">
+    <h2>Round 4 · There are 120 microwaves on campus</h2>
+    <p>Dining reveals that the five test microwaves were drawn at random from the 120 microwaves in campus residence halls. Dining does not care about Microwave 2 by name. It cares about <b>how much microwaves vary in general</b>.</p>
+    <div class="callout">Brands stay <b>fixed</b> (we chose these four). Microwaves become <b>random</b>, β<sub>j</sub> ~ N(0, σ²<sub>β</sub>). This is a mixed-effects model.</div>
+    <div class="task"><b class="lbl">Group task</b>
+      From the RCBD table (MS<sub>Microwaves</sub> = <span id="msb"></span>, MSE = <span id="mse3"></span>, a = 4):
+      <div class="check">σ̂² = <input id="in_s2" inputmode="decimal"> <button class="btn" data-check="s2">Check</button><span class="fb" id="fb_s2"></span></div>
+      <div class="check">σ̂²<sub>β</sub> = (MS<sub>Microwaves</sub> − MSE) / a = <input id="in_sb" inputmode="decimal"> <button class="btn" data-check="sb">Check</button><span class="fb" id="fb_sb"></span></div>
+      <div class="check">Share of variability from microwaves = σ̂²<sub>β</sub> / (σ̂²<sub>β</sub> + σ̂²) = <input id="in_icc" inputmode="decimal"> <button class="btn" data-check="icc">Check</button><span class="fb" id="fb_icc"></span></div>
+    </div>
+    <button class="btn" data-reveal="r4">Reveal</button>
+    <div class="reveal" id="r4">
+      <div class="bar"><div id="barB" style="background:var(--blue);width:0">between microwaves</div><div id="barW" style="background:#c98a2b;width:100%">within</div></div>
+      <p>About <b id="iccpct"></b> of the bag-to-bag variability in unpopped kernels comes from differences between microwaves.</p>
+      <div class="task"><b class="lbl">Decision</b> Dining has budget for one thing next semester: (a) switch every hall to the best brand, or (b) replace the weakest microwaves. What does the data say about each option?</div>
+      <button class="btn" data-reveal="r4b">Reveal</button>
+      <div class="reveal" id="r4b">
+        <ul class="lead">
+          <li><b>Brand:</b> Brand C leaves about <span id="cd"></span> fewer unpopped kernels than Brand D on average. Switching brands helps.</li>
+          <li><b>Microwaves:</b> the microwave standard deviation is about <span id="sdb"></span> kernels, larger than the bag-to-bag noise (about <span id="sdw"></span>). Microwave differences are the bigger source of variability.</li>
+          <li>Both are worth considering. Without blocking, Dining would not have seen either one clearly.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5 REGRESSION -->
+  <section data-title="5 · Why microwaves differ">
+    <h2>Round 5 · Why do the microwaves differ?</h2>
+    <p>Round 4 told us <i>how much</i> microwaves vary. Now Dining asks <i>why</i>. Each microwave has a power rating. Here is each microwave's mean number of unpopped kernels against its wattage.</p>
+    <div class="grid2">
+      <div id="scatter"></div>
+      <div>
+        <table>
+          <tr><th>Microwave</th><th>Watts x</th><th>Mean kernels y</th></tr>
+          <tbody id="regtab"></tbody>
+        </table>
+        <p class="muted" style="font-size:.9em">x̄ = <b id="xbar"></b>, ȳ = <b id="ybar"></b><br>
+        S<sub>xx</sub> = Σ(x − x̄)² = <b id="sxx"></b>, &nbsp; S<sub>xy</sub> = Σ(x − x̄)(y − ȳ) = <b id="sxy"></b></p>
+      </div>
+    </div>
+    <div class="task"><b class="lbl">Group task</b>
+      Fit the line ŷ = <span class="bh">β</span><sub>0</sub> + <span class="bh">β</span><sub>1</sub>x.
+      <div class="check"><span class="bh">β</span><sub>1</sub> = S<sub>xy</sub> / S<sub>xx</sub> = <input id="in_b1" inputmode="decimal"> <button class="btn" data-check="b1">Check</button><span class="fb" id="fb_b1"></span></div>
+      <div class="check"><span class="bh">β</span><sub>0</sub> = ȳ − <span class="bh">β</span><sub>1</sub> x̄ = <input id="in_b0" inputmode="decimal"> <button class="btn" data-check="b0">Check</button><span class="fb" id="fb_b0"></span></div>
+      <div class="check">Dining buys a new <b>900 W</b> microwave. Predicted mean kernels ŷ = <input id="in_yh" inputmode="decimal"> <button class="btn" data-check="yh">Check</button><span class="fb" id="fb_yh"></span></div>
+    </div>
+    <button class="btn" data-reveal="r5">Reveal the fitted line</button>
+    <div class="reveal" id="r5">
+      <p class="big" style="font-size:1.2em"><b>ŷ = <span id="eqb0"></span> <span id="eqb1"></span>x</b> &nbsp;&nbsp; R² = <span id="r2val"></span></p>
+      <div class="task"><b class="lbl">Interpret</b> 1. What does the slope mean in plain words? &nbsp; 2. What does the intercept mean, and should we trust it? &nbsp; 3. Five points gave a strong fit. What would make you cautious?</div>
+      <button class="btn" data-reveal="r5b">Reveal</button>
+      <div class="reveal" id="r5b">
+        <ul class="lead">
+          <li><b>Slope:</b> each additional 100 W is associated with about <span id="per100"></span> fewer unpopped kernels on average.</li>
+          <li><b>Intercept:</b> <span id="eqb0b"></span> kernels at 0 W. That is far outside the tested range (700 to 1200 W), so it has no practical meaning.</li>
+          <li><b>Caution:</b> the fit rests on 5 microwave means. Wattage could also be tied to microwave age or brand. A larger sample of microwaves would help.</li>
+          <li><b>Link to blocking:</b> wattage explains about <span id="r2pct"></span> of the differences between microwave means. Most of the block effect has a physical explanation.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6 SUMMARY -->
+  <section data-title="Summary">
+    <h2>What we learned</h2>
+    <div class="summary">
+      <ul class="lead">
+        <li><b>Round 1:</b> when each brand gets its own microwave, brand and microwave effects cannot be separated.</li>
+        <li><b>Round 2:</b> an RCBD puts every treatment in every block and randomizes within each block.</li>
+        <li><b>Round 3:</b> blocking left SS<sub>Brands</sub> unchanged and moved microwave variability out of the error. MSE fell from <span class="s_mse1"></span> to <span class="s_mse2"></span>, and the brand p-value fell from <span class="s_p1"></span> to <span class="s_p2"></span>.</li>
+        <li><b>Round 4:</b> treating microwaves as random lets us estimate how much microwaves vary in general: σ̂²<sub>β</sub> ≈ <span class="s_sb"></span>, about <span class="s_icc"></span> of the variability.</li>
+        <li><b>Round 5:</b> regression on wattage explains why microwaves differ: ŷ = <span class="s_eq"></span>, with R² ≈ <span class="s_r2"></span>.</li>
+      </ul>
+    </div>
+    <p class="muted" style="margin-top:14px">Bonus question: what if the <b>time of day</b> also matters (microwaves are busier and run hotter at night)? How would you design the next study with both microwave and time of day? (Hint: think back to the Sudoku.)</p>
+  </section>
+</div>
+
+<footer>
+  <span class="brand">Mizzou</span>
+  <span class="nav"><button id="prev">Back</button><button id="next">Next</button></span>
+</footer>
+
+<script>
+// ---------- data ----------
+const brands=["A","B","C","D"];
+const brandNames={A:"Brand A",B:"Brand B",C:"Brand C",D:"Brand D"};
+const watts=[800,1200,700,1000,1100];
+const Y=[[45,35,50,40,39],
+         [46,35,49,45,38],
+         [47,30,47,39,37],
+         [50,38,51,45,46]];
+const a=4,b=5,N=20;
+const sum=v=>v.reduce((s,x)=>s+x,0);
+const g=sum(Y.flat())/N;
+const rm=Y.map(r=>sum(r)/b);
+const cm=[...Array(b)].map((_,j)=>sum(Y.map(r=>r[j]))/a);
+const SST=sum(Y.flat().map(y=>(y-g)**2));
+const SSR=b*sum(rm.map(m=>(m-g)**2));
+const SSB=a*sum(cm.map(m=>(m-g)**2));
+const SSE=SST-SSR-SSB;
+const MSR=SSR/(a-1), MSB=SSB/(b-1), MSE2=SSE/((a-1)*(b-1));
+const SSE1=SST-SSR, MSE1=SSE1/(N-a);
+const F1=MSR/MSE1, F2=MSR/MSE2, FB=MSB/MSE2;
+
+function lgamma(x){const c=[76.18009172947146,-86.50532032941677,24.01409824083091,-1.231739572450155,0.1208650973866179e-2,-0.5395239384953e-5];
+  let y=x,t=x+5.5;t-=(x+0.5)*Math.log(t);let s=1.000000000190015;for(const k of c)s+=k/++y;return -t+Math.log(2.5066282746310005*s/x);}
+function betacf(a,b,x){let qab=a+b,qap=a+1,qam=a-1,c=1,d=1-qab*x/qap;d=1/(Math.abs(d)<1e-30?1e-30:d);let h=d;
+  for(let m=1;m<200;m++){let m2=2*m,aa=m*(b-m)*x/((qam+m2)*(a+m2));d=1+aa*d;d=1/(Math.abs(d)<1e-30?1e-30:d);c=1+aa/c;if(Math.abs(c)<1e-30)c=1e-30;h*=d*c;
+  aa=-(a+m)*(qab+m)*x/((a+m2)*(qap+m2));d=1+aa*d;d=1/(Math.abs(d)<1e-30?1e-30:d);c=1+aa/c;if(Math.abs(c)<1e-30)c=1e-30;const del=d*c;h*=del;if(Math.abs(del-1)<3e-12)break;}return h;}
+function ibeta(x,a,b){if(x<=0)return 0;if(x>=1)return 1;const bt=Math.exp(lgamma(a+b)-lgamma(a)-lgamma(b)+a*Math.log(x)+b*Math.log(1-x));
+  return x<(a+1)/(a+b+2)?bt*betacf(a,b,x)/a:1-bt*betacf(b,a,1-x)/b;}
+const fP=(F,d1,d2)=>ibeta(d2/(d2+d1*F),d2/2,d1/2);
+const p1=fP(F1,a-1,N-a), p2=fP(F2,a-1,(a-1)*(b-1)), pB=fP(FB,b-1,(a-1)*(b-1));
+const sb2=(MSB-MSE2)/a, icc=sb2/(sb2+MSE2);
+const f=(x,d=2)=>x.toFixed(d);
+const fp=p=>p<0.0001?'< 0.0001':(p<0.01?p.toFixed(4):p.toFixed(3));
+window.STATS={SST,SSR,SSB,SSE,MSE1,MSE2,F1,F2,p1,p2,pB,sb2,icc};
+
+// ---------- illustrations ----------
+function microwave(j){
+  return `<div class="mw" id="mw${j}"><svg width="132" height="92" viewBox="0 0 132 92">
+    <rect x="2" y="2" width="128" height="80" rx="7" fill="#e9e9e9" stroke="#555" stroke-width="2"/>
+    <rect class="glow" x="12" y="12" width="80" height="60" rx="4" fill="#4a4a4a"/>
+    <rect x="100" y="12" width="22" height="60" rx="3" fill="#cfcfcf"/>
+    <rect x="104" y="18" width="14" height="9" rx="1" fill="#2e7d32"/>
+    <circle cx="111" cy="40" r="3" fill="#777"/><circle cx="111" cy="50" r="3" fill="#777"/><circle cx="111" cy="60" r="3" fill="#777"/>
+    <rect x="20" y="82" width="12" height="6" fill="#555"/><rect x="100" y="82" width="12" height="6" fill="#555"/>
+    <text x="52" y="47" text-anchor="middle" font-size="18" font-weight="700" fill="#fff" font-family="Satoshi,sans-serif">M${j+1}</text>
+  </svg>${watts[j]} W</div>`;
+}
+document.getElementById('mwIntro').innerHTML=watts.map((_,j)=>microwave(j)).join('');
+document.getElementById('mwRun').innerHTML=watts.map((_,j)=>microwave(j)).join('').replaceAll('id="mw','id="run');
+document.getElementById('bagsIntro').innerHTML=brands.map(k=>`<div class="bag ${k}"><span class="letter">${k}</span>${brandNames[k]}</div>`).join('');
+
+// ---------- data table ----------
+function drawTable(revealed){
+  let h='<table><tr><th class="l">Brand</th>'+cm.map((_,j)=>`<th>M${j+1}</th>`).join('')+'<th>Brand mean ȳ<sub>i·</sub></th></tr>';
+  Y.forEach((r,i)=>{h+=`<tr><td class="l"><b>Brand ${brands[i]}</b></td>`+r.map((y,j)=>`<td class="k" id="k${i}${j}">${revealed?y:'?'}</td>`).join('')+`<td><b class="mean">${revealed?f(rm[i],2):''}</b></td></tr>`;});
+  h+='<tr><td class="l"><b>Microwave mean ȳ<sub>·j</sub></b></td>'+cm.map(m=>`<td><b>${revealed?f(m,2):''}</b></td>`).join('')+`<td>${revealed?'ȳ<sub>··</sub> = <b>'+f(g,2)+'</b>':''}</td></tr></table>`;
+  document.getElementById('datatable').innerHTML=h;
+}
+drawTable(false);
+document.getElementById('popBtn').onclick=function(){
+  this.disabled=true; this.style.display='none';
+  const order=[]; for(let j=0;j<b;j++) for(let i=0;i<a;i++) order.push([i,j]);
+  let t=0;
+  for(let j=0;j<b;j++){ setTimeout(()=>document.getElementById('run'+j).classList.add('on'),j*a*170); setTimeout(()=>document.getElementById('run'+j).classList.remove('on'),(j+1)*a*170); }
+  order.forEach(([i,j],n)=>setTimeout(()=>{
+    const c=document.getElementById(`k${i}${j}`); c.textContent=Y[i][j]; c.classList.add('pop');
+    const s=document.createElement('span'); s.className='burst'; s.textContent='🍿'; c.appendChild(s); setTimeout(()=>s.remove(),700);
+  },n*170));
+  setTimeout(()=>{drawTable(true);document.getElementById('afterPop').style.display='block';},order.length*170+400);
+};
+
+document.getElementById('sst').textContent=f(SST);
+function aovTable(rows){return '<table><tr><th class="l">Source</th><th>SS</th><th>df</th><th>MS</th><th>F₀</th><th>p</th></tr>'+
+  rows.map(r=>`<tr class="${r.cls||''}"><td class="l">${r.s}</td><td>${f(r.ss)}</td><td>${r.df}</td><td>${r.ms==null?'':f(r.ms)}</td><td>${r.F==null?'':f(r.F)}</td><td>${r.p==null?'':fp(r.p)}</td></tr>`).join('')+'</table>';}
+document.getElementById('aov1').innerHTML=aovTable([
+  {s:'Brands',ss:SSR,df:3,ms:MSR,F:F1,p:p1},
+  {s:'Error',ss:SSE1,df:16,ms:MSE1,cls:'hl'},
+  {s:'Total',ss:SST,df:19}]);
+document.getElementById('aov2').innerHTML=aovTable([
+  {s:'Brands',ss:SSR,df:3,ms:MSR,F:F2,p:p2},
+  {s:'Microwaves',ss:SSB,df:4,ms:MSB,F:FB,p:pB},
+  {s:'Error',ss:SSE,df:12,ms:MSE2,cls:'hl'},
+  {s:'Total',ss:SST,df:19}]);
+const set=(id,v)=>document.getElementById(id).textContent=v;
+const setc=(c,v)=>document.querySelectorAll('.'+c).forEach(e=>e.textContent=v);
+set('mse1',f(MSE1)); set('mse2',f(MSE2)); set('p1',fp(p1)); set('p2',fp(p2));
+set('mC',f(rm[2],1)+' kernels'); set('mb2',f(cm[1],1));
+set('msb',f(MSB)); set('mse3',f(MSE2));
+set('iccpct',Math.round(icc*100)+'%'); set('cd',f(rm[3]-rm[2],0));
+set('sdb',f(Math.sqrt(sb2),1)); set('sdw',f(Math.sqrt(MSE2),1));
+setc('s_mse1',f(MSE1)); setc('s_mse2',f(MSE2)); setc('s_p1',fp(p1)); setc('s_p2',fp(p2));
+setc('s_sb',f(sb2)); setc('s_icc',Math.round(icc*100)+'%');
+
+// ---------- regression on wattage ----------
+const xbar=sum(watts)/b, ybar=sum(cm)/b;
+const Sxx=sum(watts.map(x=>(x-xbar)**2)), Sxy=sum(watts.map((x,j)=>(x-xbar)*(cm[j]-ybar)));
+const b1=Sxy/Sxx, b0=ybar-b1*xbar, yh900=b0+b1*900;
+const SSreg=b1*Sxy, Syy=sum(cm.map(y=>(y-ybar)**2)), R2=SSreg/Syy;
+window.STATS.reg={b0,b1,R2,yh900,Sxx,Sxy};
+document.getElementById('regtab').innerHTML=watts.map((x,j)=>`<tr><td>M${j+1}</td><td>${x}</td><td>${f(cm[j],2)}</td></tr>`).join('');
+set('xbar',f(xbar,0)); set('ybar',f(ybar,2)); set('sxx',Sxx.toLocaleString()); set('sxy',f(Sxy,1).replace(/\B(?=(\d{3})+(?!\d))/g,','));
+set('eqb0',f(b0,2)); set('eqb1',(b1<0?'− ':'+ ')+Math.abs(b1).toFixed(4)); set('r2val',f(R2,3));
+set('per100',f(-b1*100,1)); set('eqb0b',f(b0,1)); set('r2pct',Math.round(R2*100)+'%');
+setc('s_eq',`${f(b0,2)} − ${Math.abs(b1).toFixed(4)}x`); setc('s_r2',f(R2,2));
+function drawScatter(withLine){
+  const W=440,H=300,L=56,R=16,T=16,B=48, x0=650,x1=1250,y0=30,y1=52;
+  const X=x=>L+(x-x0)/(x1-x0)*(W-L-R), Yp=y=>H-B-(y-y0)/(y1-y0)*(H-T-B);
+  let s=`<svg viewBox="0 0 ${W} ${H}" width="100%" style="max-width:${W}px">`;
+  for(let y=30;y<=52;y+=5){s+=`<line x1="${L}" x2="${W-R}" y1="${Yp(y)}" y2="${Yp(y)}" stroke="#eee"/><text x="${L-8}" y="${Yp(y)+4}" text-anchor="end" font-size="11" fill="#666">${y}</text>`;}
+  for(let x=700;x<=1200;x+=100){s+=`<text x="${X(x)}" y="${H-B+18}" text-anchor="middle" font-size="11" fill="#666">${x}</text>`;}
+  s+=`<line x1="${L}" x2="${W-R}" y1="${H-B}" y2="${H-B}" stroke="#333"/><line x1="${L}" x2="${L}" y1="${T}" y2="${H-B}" stroke="#333"/>`;
+  s+=`<text x="${(L+W-R)/2}" y="${H-8}" text-anchor="middle" font-size="12" fill="#333">Microwave power (W)</text>`;
+  s+=`<text x="14" y="${(T+H-B)/2}" text-anchor="middle" font-size="12" fill="#333" transform="rotate(-90 14 ${(T+H-B)/2})">Mean unpopped kernels</text>`;
+  if(withLine){s+=`<line x1="${X(680)}" y1="${Yp(b0+b1*680)}" x2="${X(1220)}" y2="${Yp(b0+b1*1220)}" stroke="#c98a2b" stroke-width="3"/>`;
+    s+=`<line x1="${X(900)}" x2="${X(900)}" y1="${Yp(yh900)}" y2="${H-B}" stroke="#999" stroke-dasharray="4 3"/><circle cx="${X(900)}" cy="${Yp(yh900)}" r="6" fill="#c98a2b"/>`;
+    s+=`<text x="${X(900)+10}" y="${Yp(yh900)-10}" font-size="12" fill="#333">900 W: ${f(yh900,1)}</text>`;}
+  watts.forEach((x,j)=>{s+=`<circle cx="${X(x)}" cy="${Yp(cm[j])}" r="6" fill="#444"/><text x="${X(x)+9}" y="${Yp(cm[j])+4}" font-size="11" fill="#444">M${j+1}</text>`;});
+  document.getElementById('scatter').innerHTML=s+'</svg>';
+}
+drawScatter(false);
+
+// ---------- answer checks ----------
+const targets={str:SSR,sbl:SSB,s2:MSE2,sb:sb2,icc:icc,b1:b1,b0:b0,yh:yh900};
+document.querySelectorAll('[data-check]').forEach(btn=>btn.onclick=()=>{
+  const k=btn.dataset.check, v=parseFloat(document.getElementById('in_'+k).value), t=targets[k], fb=document.getElementById('fb_'+k);
+  if(isNaN(v)){fb.textContent='Enter a number.';fb.className='fb bad';return;}
+  let vv=v; if(k==='icc'&&v>1) vv=v/100;
+  const tol=k==='icc'?0.01:(k==='b1'?0.0005:(k==='b0'?0.6:Math.max(0.3,Math.abs(t)*0.02)));
+  const shown=k==='icc'?f(t,3):(k==='b1'?t.toFixed(4):f(t));
+  if(Math.abs(vv-t)<=tol){fb.textContent=`Correct (${shown})`;fb.className='fb good';}
+  else{fb.textContent='Not yet. Check your arithmetic.';fb.className='fb bad';}
+});
+
+// ---------- plans ----------
+const planDefs=[
+  {name:'Plan 1 · Fully random',cols:[["B","A","B","D"],["C","C","A","B"],["D","A","D","D"],["A","B","C","C"],["B","D","C","A"]]},
+  {name:'Plan 2 · One brand per microwave',cols:[["A","A","A","A"],["B","B","B","B"],["C","C","C","C"],["D","D","D","D"],["A","B","C","D"]]},
+  {name:'Plan 3 · RCBD',cols:[["C","A","D","B"],["B","D","A","C"],["A","C","B","D"],["D","B","C","A"],["B","A","D","C"]]}
+];
+function drawPlans(){
+  document.getElementById('plans').innerHTML=planDefs.map((p,k)=>`<div class="plan" id="plan${k}"><h3>${p.name}</h3><div class="batchrow">`+
+    p.cols.map((c,j)=>`<div class="col"><small>M${j+1}</small>${c.map(x=>`<div class="cell ${x}">${x}</div>`).join('')}</div>`).join('')+
+    `</div></div>`).join('');
+}
+drawPlans();
+document.getElementById('shuffle').onclick=()=>{
+  planDefs[2].cols=planDefs[2].cols.map(c=>{const s=[...c];for(let i=s.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[s[i],s[j]]=[s[j],s[i]];}return s;});
+  drawPlans(); document.getElementById('plan2').classList.add('pick');
+};
+
+// ---------- reveals ----------
+document.querySelectorAll('[data-reveal]').forEach(btn=>btn.onclick=()=>{
+  const id=btn.dataset.reveal; document.getElementById(id).classList.add('on'); btn.style.display='none';
+  if(id==='r2') document.getElementById('plan2').classList.add('pick');
+  if(id==='r5') drawScatter(true);
+  if(id==='r4'){setTimeout(()=>{const w=Math.round(icc*100);
+    document.getElementById('barB').style.width=w+'%'; document.getElementById('barB').textContent='between microwaves '+w+'%';
+    document.getElementById('barW').style.width=(100-w)+'%'; document.getElementById('barW').textContent=(100-w)+'%';},50);}
+});
+
+// ---------- navigation ----------
+const secs=[...document.querySelectorAll('section')]; let cur=0; const seen=new Set([0]);
+const steps=document.getElementById('steps');
+secs.forEach((s,i)=>{const bt=document.createElement('button');bt.textContent=s.dataset.title;bt.onclick=()=>go(i);steps.appendChild(bt);});
+function go(i){cur=Math.max(0,Math.min(secs.length-1,i));seen.add(cur);
+  secs.forEach((s,k)=>s.classList.toggle('on',k===cur));
+  [...steps.children].forEach((bt,k)=>{bt.className=k===cur?'on':(seen.has(k)?'done':'');});
+  document.getElementById('prev').disabled=cur===0; document.getElementById('next').disabled=cur===secs.length-1; window.scrollTo(0,0);}
+document.getElementById('prev').onclick=()=>go(cur-1);
+document.getElementById('next').onclick=()=>go(cur+1);
+document.addEventListener('keydown',e=>{if(e.target.tagName==='INPUT')return;if(e.key==='ArrowRight')go(cur+1);if(e.key==='ArrowLeft')go(cur-1);});
+go(0);
+</script>
+</body>
+</html>
