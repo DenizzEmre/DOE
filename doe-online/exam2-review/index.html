@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ISE 8110 Exam 2 Review</title>
+<style>
+  :root{
+    --gold:#FDB719; --black:#1a1a1a; --tan:#F4EBDC; --tanline:#D9C7A6;
+    --grey:#5c5c5c; --line:#e3e3e3; --ok:#2e7d32; --bad:#b3261e; --bg:#ffffff;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--black);
+    font-family:Aptos,"Segoe UI",system-ui,-apple-system,Helvetica,Arial,sans-serif;font-size:16px;line-height:1.5}
+  h1,h2,h3{font-family:Satoshi,"Segoe UI",system-ui,Helvetica,Arial,sans-serif;font-weight:700;margin:0}
+  header{background:var(--black);color:#fff;padding:18px 24px}
+  header h1{font-size:22px}
+  header .sub{color:var(--gold);font-size:14px;margin-top:2px}
+  .bar{display:flex;gap:6px;padding:10px 24px;border-bottom:1px solid var(--line);flex-wrap:wrap;align-items:center}
+  .bar button{border:1px solid var(--line);background:#fff;padding:6px 12px;border-radius:4px;cursor:pointer;font:inherit;font-size:14px}
+  .bar button.active{background:var(--gold);border-color:var(--gold);font-weight:700}
+  .bar button:disabled{color:#aaa;cursor:not-allowed}
+  .bar .score{margin-left:auto;font-size:14px;color:var(--grey)}
+  .bar .score b{color:var(--black)}
+  main{max-width:860px;margin:0 auto;padding:20px 24px 40px}
+  .story{margin:8px 0 14px}
+  .callout{background:var(--tan);border-left:4px solid var(--gold);padding:10px 14px;margin:12px 0;font-size:15px}
+  .callout ul{margin:4px 0 0 18px;padding:0}
+  table{border-collapse:collapse;margin:10px 0;font-size:14.5px}
+  th,td{padding:4px 12px;text-align:right;border-bottom:1px solid var(--line)}
+  th:first-child,td:first-child{text-align:left}
+  thead th{border-bottom:2px solid var(--black)}
+  .tables{display:flex;gap:28px;flex-wrap:wrap}
+  .tables .cap{font-weight:700;font-size:14px;margin-top:6px}
+  .q{border-top:1px solid var(--line);padding:16px 0}
+  .q .qhead{font-weight:700;margin-bottom:6px}
+  .q .qhead .tag{font-weight:400;font-size:13px;color:var(--grey);margin-left:6px}
+  .opts{display:flex;flex-direction:column;gap:6px;margin-top:6px}
+  .opt{text-align:left;border:1px solid var(--line);background:#fff;padding:8px 12px;border-radius:4px;cursor:pointer;font:inherit}
+  .opt:hover{border-color:var(--gold)}
+  .opt.wrong{border-color:var(--bad);color:var(--bad);text-decoration:line-through}
+  .opt.right{border-color:var(--ok);background:#eef6ee}
+  .num{display:flex;gap:8px;align-items:center;margin-top:6px;flex-wrap:wrap}
+  .num input{font:inherit;padding:6px 10px;width:140px;border:1px solid #bbb;border-radius:4px}
+  .btn{font:inherit;font-size:14px;padding:6px 14px;border-radius:4px;border:1px solid var(--black);background:var(--black);color:#fff;cursor:pointer}
+  .btn.ghost{background:#fff;color:var(--black);border-color:#bbb}
+  .btn.gold{background:var(--gold);border-color:var(--gold);color:var(--black);font-weight:700}
+  .clue{font-size:14.5px;background:#fffbea;border:1px dashed var(--gold);padding:8px 12px;margin-top:8px;display:none}
+  .fb{font-size:14.5px;margin-top:8px}
+  .fb.bad{color:var(--bad)}
+  .explain{display:none;margin-top:8px;font-size:14.5px;background:var(--tan);border-left:4px solid var(--tanline);padding:8px 12px}
+  .done .qhead::after{content:"  ✓";color:var(--ok)}
+  .rowbtns{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}
+  .grid td{text-align:center}
+  .grid .lot{display:block;font-size:11.5px;color:var(--grey)}
+  .next{margin-top:18px;display:none}
+  footer{position:fixed;left:0;right:0;bottom:0;background:var(--gold);color:var(--black);font-size:13px;padding:7px 24px;font-weight:700}
+  .summary td,.summary th{text-align:left}
+  .muted{color:var(--grey);font-size:14px}
+  svg text{font-family:Aptos,"Segoe UI",system-ui,Helvetica,Arial,sans-serif}
+  .plotwrap{display:none;margin-top:10px}
+  sub,sup{line-height:0}
+</style>
+</head>
+<body>
+<header>
+  <h1>Exam 2 Review</h1>
+  <div class="sub">Remember the Candy Factory? It is back for the night shift.</div>
+  <div class="sub" style="color:#ccc">ISE 8110 · Linear Models, Blocking, Random Effects, Factorials</div>
+</header>
+<div class="bar" id="bar"></div>
+<main id="main"></main>
+
+
+<script>
+/* ---------------- Scoring rules ----------------
+   Each question: 10 pts. Clue: -3. Wrong attempt: -2. A question never drops below 2 pts once solved. */
+const ROOMS = [
+{
+  id:"r1", name:"Room 1 · Linear Models",
+  intro:`<p class="story">The factory's night shift starts in the packing room. Bars that come out too brittle or too sticky get rejected at packing. The supervisor held the room at six relative humidity settings and counted rejected bars per 1,000.</p>
+  <table><thead><tr><th>Relative humidity (%)</th><th>40</th><th>50</th><th>60</th><th>70</th><th>80</th><th>90</th></tr></thead>
+  <tbody><tr><td>Rejected per 1,000</td><td>15</td><td>11</td><td>8</td><td>9</td><td>12</td><td>18</td></tr></tbody></table>
+  <p>Model: <i>Y</i> = β<sub>0</sub> + β<sub>1</sub><i>x</i> + β<sub>2</sub><i>x</i><sup>2</sup> + ε. R output from <code>summary(lm(Y ~ x + I(x^2)))</code>:</p>
+  <table><thead><tr><th>Coefficient</th><th>Estimate</th><th>Std. Error</th><th>t value</th><th>Pr(&gt;|t|)</th></tr></thead>
+  <tbody>
+   <tr><td>(Intercept)</td><td>60.6143</td><td>2.6697</td><td>22.705</td><td>0.00019</td></tr>
+   <tr><td>x</td><td>−1.66357</td><td>0.08615</td><td>−19.310</td><td>0.00030</td></tr>
+   <tr><td>I(x^2)</td><td>0.013214</td><td>0.000659</td><td>20.066</td><td>0.00027</td></tr>
+  </tbody></table>`,
+  qs:[
+   {type:"mc", q:"Which is the fitted equation?",
+    opts:["ŷ = 60.6143 − 1.66357x + 0.013214x²","ŷ = 60.6143 + 1.66357x − 0.013214x²","ŷ = 2.6697 + 0.08615x + 0.000659x²","ŷ = 22.705 − 19.310x + 20.066x²"], a:0,
+    clue:"Use the <b>Estimate</b> column, and keep the signs. The other columns describe uncertainty or test statistics.",
+    ex:"β̂<sub>0</sub> = 60.6143, β̂<sub>1</sub> = −1.66357, β̂<sub>2</sub> = 0.013214. Standard errors and t values are not coefficients. On the exam, label each β̂ explicitly."},
+   {type:"mc", q:"Which hypotheses test whether the quadratic term is needed?",
+    opts:["H₀: β₂ = 0  vs.  H₁: β₂ ≠ 0","H₀: β̂₂ = 0  vs.  H₁: β̂₂ ≠ 0","H₀: β₁ = β₂ = 0  vs.  H₁: at least one ≠ 0","H₀: β₂ > 0  vs.  H₁: β₂ ≤ 0"], a:0,
+    clue:"Hypotheses are about the <i>population</i> parameter, not the estimate. And the question is about one term.",
+    ex:"Hypotheses are stated for β<sub>2</sub>, the unknown parameter. β̂<sub>2</sub> is a number we already computed. The joint test of β<sub>1</sub> and β<sub>2</sub> is the overall F-test, which answers a different question."},
+   {type:"mc", q:"At α = 0.05, what do you conclude about the quadratic term?",
+    opts:["Reject H₀ (p = 0.00027 < 0.05): the curvature term is useful, given the linear term is in the model","Fail to reject H₀ because the estimate 0.013214 is close to zero","Reject H₀ because the t value is positive","Cannot decide without R²"], a:0,
+    clue:"Compare the p-value in the I(x^2) row to α. A small estimate can still be large relative to its standard error.",
+    ex:"t = 0.013214 / 0.000659 ≈ 20.07 with n − 3 = 3 df, p ≈ 0.00027. The size of β̂<sub>2</sub> alone says nothing; it multiplies x², which is in the thousands here. Note the residual df: 6 points − 3 parameters = 3."},
+   {type:"num", q:"Bonus: at which humidity does the fitted curve reach its minimum? (% RH, 1 decimal)", a:62.95, tol:0.4,
+    clue:"For ax² + bx + c, the vertex is at x = −b / (2a). Here b = β̂<sub>1</sub>, a = β̂<sub>2</sub>.",
+    ex:"x* = 1.66357 / (2 × 0.013214) ≈ 62.9% RH. Positive β̂<sub>2</sub> makes the curve open upward, so this point is the lowest-reject humidity."}
+  ]
+},
+{
+  id:"r2", name:"Room 2 · Blocking",
+  intro:`<p class="story">Fresh chocolate bars need to set. The team compares three cooling methods (Air, Tunnel, Fridge) on the minutes until a bar sets. Each method was run once on each of four trays. The cocoa lot also varied from run to run, so two blocking choices were fitted to the same 12 runs.</p>
+  <table class="grid"><thead><tr><th>Method</th><th>Tray 1</th><th>Tray 2</th><th>Tray 3</th><th>Tray 4</th></tr></thead><tbody>
+   <tr><td>Air</td><td>30.4<span class="lot">Lot 1</span></td><td>32.4<span class="lot">Lot 2</span></td><td>29.3<span class="lot">Lot 3</span></td><td>32.3<span class="lot">Lot 4</span></td></tr>
+   <tr><td>Tunnel</td><td>27.5<span class="lot">Lot 2</span></td><td>31.5<span class="lot">Lot 3</span></td><td>27.2<span class="lot">Lot 4</span></td><td>30.6<span class="lot">Lot 1</span></td></tr>
+   <tr><td>Fridge</td><td>27.3<span class="lot">Lot 3</span></td><td>30.2<span class="lot">Lot 4</span></td><td>25.4<span class="lot">Lot 1</span></td><td>29.9<span class="lot">Lot 2</span></td></tr>
+  </tbody></table>
+  <div class="tables">
+   <div><div class="cap">Model A: block on Tray</div>
+   <table><thead><tr><th>Source</th><th>Df</th><th>Sum Sq</th><th>Mean Sq</th><th>F</th><th>p</th></tr></thead><tbody>
+    <tr><td>Method</td><td>2</td><td>17.360</td><td>8.680</td><td>29.37</td><td>0.0008</td></tr>
+    <tr><td>Tray</td><td>3</td><td>34.767</td><td>11.589</td><td>39.21</td><td>0.0002</td></tr>
+    <tr><td>Residuals</td><td>6</td><td>1.773</td><td>0.296</td><td></td><td></td></tr></tbody></table></div>
+   <div><div class="cap">Model B: block on Cocoa Lot</div>
+   <table><thead><tr><th>Source</th><th>Df</th><th>Sum Sq</th><th>Mean Sq</th><th>F</th><th>p</th></tr></thead><tbody>
+    <tr><td>Method</td><td>2</td><td>17.360</td><td>8.680</td><td>1.53</td><td>0.290</td></tr>
+    <tr><td>Lot</td><td>3</td><td>2.567</td><td>0.856</td><td>0.15</td><td>0.925</td></tr>
+    <tr><td>Residuals</td><td>6</td><td>33.973</td><td>5.662</td><td></td><td></td></tr></tbody></table></div>
+  </div>`,
+  qs:[
+   {type:"mc", q:"Which factor should be the block in next month's experiment?",
+    opts:["Tray: it pulls a large amount of variation (SS = 34.8, p = 0.0002) out of the error term","Cocoa Lot: its p-value is larger, so it is a safer block","Either one: Method SS is identical, so the choice does not matter","Neither: blocking always lowers the error df, so it should be avoided"], a:0,
+    clue:"A good block is one that explains a lot of variability that would otherwise land in the residuals. Compare the two residual MS values.",
+    ex:"Tray: MS = 11.59 vs. MSE = 0.296 (F = 39.2). Lot: MS = 0.856 vs. MSE = 5.66 (F = 0.15). Lot explains almost nothing; Tray explains most of the noise. Exam answers should cite numbers from both tables."},
+   {type:"mc", q:"Suppose next month the team skips blocking and runs a one-way ANOVA on Method only. Compared with Model A, what happens to the MSE and to the test for Method?",
+    opts:["MSE gets larger than 0.296, because the tray-to-tray variation is no longer removed and lands in the error term; F for Method gets smaller, so real method differences are harder to detect","MSE stays at 0.296, because the same 12 runs are used","MSE gets smaller, because the error term gains 3 degrees of freedom","MSE stays the same, but the Method sum of squares gets larger"], a:0,
+    clue:"In Model A, Tray took SS = 34.767 out of the leftover variation. Without Tray in the model, where does that variation go?",
+    ex:"Without the block, SS<sub>Tray</sub> and its df fold into the error: (34.767 + 1.773) / 9 ≈ 4.06, about 14 times the blocked MSE. Method MS stays 8.680, so F drops from about 29 to about 2.1 and the method differences are no longer significant. Discussion point: the trays were there whether or not we modeled them. Blocking does not remove the noise from the process; it removes it from the comparison."},
+   {type:"mc", q:"The residual mean square is 0.296 in Model A and 5.662 in Model B. What does the residual mean, and why is Model B's so much larger?",
+    opts:["The residual is the variation the model does not explain. Model B leaves Tray out, so the tray-to-tray variation stays in its residual","The residual is the mistakes made in the experiment. Model B had more mistakes","The residual is the variation from Method. The methods differ more in Model B","The residual is the variation from Cocoa Lot. Model A removed it"], a:0,
+    clue:"Residual = observed − fitted. Which model has Tray in it?",
+    ex:"Residual = what is left over after the model explains what it can. Model A explains Method and Tray, so little is left: 0.296. Model B explains Method and Lot, but Lot explains almost nothing, so the tray variation is still left over: 5.662. Same data, different leftovers."}
+  ]
+},
+{
+  id:"r3", name:"Room 3 · Random Effects Models",
+  intro:`<p class="story">The plant has hundreds of trays in storage. The four trays in Room 2 were pulled at random from that stack, and management wants conclusions about <b>trays in general</b>, not about these four. Use <b>Model A</b> (block on Tray) from Room 2.</p>
+  <table><thead><tr><th>Source</th><th>Df</th><th>Sum Sq</th><th>Mean Sq</th><th>F</th><th>p</th></tr></thead><tbody>
+   <tr><td>Method</td><td>2</td><td>17.360</td><td>8.680</td><td>29.37</td><td>0.0008</td></tr>
+   <tr><td>Tray</td><td>3</td><td>34.767</td><td>11.589</td><td>39.21</td><td>0.0002</td></tr>
+   <tr><td>Residuals</td><td>6</td><td>1.773</td><td>0.296</td><td></td><td></td></tr></tbody></table>`,
+  qs:[
+   {type:"mc", q:"Which factors are fixed and which are random?",
+    opts:["Method is fixed (the three methods are the ones of interest); Tray is random (a sample from a large population we want to generalize to)","Both are random because the run order was randomized","Both are fixed because each has a small number of levels","Method is random; Tray is fixed"], a:0,
+    clue:"Ask of each factor: are these levels the whole story, or a sample standing in for many others?",
+    ex:"Fixed vs. random is about the inference target, not about randomized run order or the number of levels. Air, Tunnel and Fridge are the specific methods under study. The four trays represent all trays."},
+   {type:"mc", q:"Which model is appropriate?",
+    opts:["y<sub>ij</sub> = μ + τ<sub>i</sub> + β<sub>j</sub> + ε<sub>ij</sub>, Στ<sub>i</sub> = 0, β<sub>j</sub> ~ N(0, σ<sub>β</sub>²), ε<sub>ij</sub> ~ N(0, σ²), β and ε independent","y<sub>ij</sub> = μ + τ<sub>i</sub> + β<sub>j</sub> + ε<sub>ij</sub>, Στ<sub>i</sub> = 0, Σβ<sub>j</sub> = 0, ε<sub>ij</sub> ~ N(0, σ²)","y<sub>ij</sub> = μ + τ<sub>i</sub> + β<sub>j</sub>, τ<sub>i</sub> ~ N(0, σ<sub>τ</sub>²), β<sub>j</sub> ~ N(0, σ<sub>β</sub>²)","y<sub>ij</sub> = μ + β<sub>j</sub> + ε<sub>ij</sub>, β<sub>j</sub> ~ N(0, σ<sub>β</sub>²)"], a:0,
+    clue:"Fixed effects get a sum-to-zero constraint. Random effects get a distribution. Every model still needs an error term.",
+    ex:"Define every symbol on the exam: i = 1,…,3 methods, j = 1,…,4 trays; μ overall mean; τ<sub>i</sub> fixed method effect; β<sub>j</sub> random tray effect; ε<sub>ij</sub> random error. Option 2 treats trays as fixed; option 3 drops ε; option 4 drops the method."},
+   {type:"mc", q:"Is there significant variability between trays? Pick the right hypotheses and conclusion.",
+    opts:["H₀: σ<sub>β</sub>² = 0  vs.  H₁: σ<sub>β</sub>² > 0. F = 39.21, p = 0.0002 < 0.05, so reject H₀: setting time varies significantly between trays","H₀: β<sub>1</sub> = β<sub>2</sub> = β<sub>3</sub> = β<sub>4</sub> = 0  vs.  H₁: at least one β<sub>j</sub> ≠ 0. Reject H₀","H₀: σ<sub>β</sub>² = 0  vs.  H₁: σ<sub>β</sub>² > 0. Fail to reject H₀, because MS<sub>Tray</sub> is larger than MSE","H₀: σ² = 0  vs.  H₁: σ² > 0. Reject H₀"], a:0,
+    clue:"Tray is random, so the hypothesis is about its variance, not about the four tray effects. A variance cannot be negative, so H₁ is one-sided.",
+    ex:"Same structure as the loom example. With a random factor, we test σ<sub>β</sub>² = 0, because the four trays stand in for all trays. The F statistic is computed the same way: MS<sub>Tray</sub> / MSE = 11.589 / 0.296 ≈ 39.2."},
+   {type:"num", q:"Estimate the within-tray (residual) variance σ̂² (3 decimals).", a:0.296, tol:0.004,
+    clue:"E[MSE] = σ².",
+    ex:"σ̂² = MSE = 0.296."},
+   {type:"num", q:"Way 1. Estimate the between-tray variance with the formula from the loom example: σ̂<sub>β</sub>² = (MS<sub>Tray</sub> − MSE) / n (3 decimals).", a:3.764, tol:0.03,
+    clue:"In the loom example, n = 4 observations per loom. Here, how many observations does each tray have? Count the methods run on one tray.",
+    ex:"n = 3 (Air, Tunnel and Fridge on each tray). σ̂<sub>β</sub>² = (11.589 − 0.296) / 3 ≈ 3.764. If the subtraction ever goes negative, the usual practice is to report 0 and say so."},
+   {type:"num", q:"Way 2. Use the expected mean square E[MS<sub>Tray</sub>] = σ² + 3σ<sub>β</sub>². Replace E[MS<sub>Tray</sub>] with 11.589 and σ² with σ̂², then solve for σ̂<sub>β</sub>² (3 decimals).", a:3.764, tol:0.03,
+    clue:"11.589 = 0.296 + 3σ̂<sub>β</sub>². Move 0.296 to the left, then divide by 3.",
+    ex:"11.589 − 0.296 = 3σ̂<sub>β</sub>², so σ̂<sub>β</sub>² ≈ 3.764. Same answer as Way 1: the loom formula is this equation solved for σ<sub>β</sub>². The \"n\" in the formula is the coefficient in front of σ<sub>β</sub>² in the expected mean square."},
+   {type:"mc", q:"Why can't MS<sub>Tray</sub> = 11.589 be used directly as the between-tray variance?",
+    opts:["Its expected value is σ² + 3σ<sub>β</sub>², so it mixes run-to-run error with tray variation and is scaled by the 3 observations per tray","It has only 3 degrees of freedom","It is a sum of squares, not a variance","It is computed from the method means"], a:0,
+    clue:"Look at the expected mean square.",
+    ex:"Each tray mean averages 3 runs, so MS<sub>Tray</sub> carries both sources. Subtract σ² and divide by 3 to isolate σ<sub>β</sub>²."},
+   {type:"num", q:"Total estimated variance of one observation (for a given method): Var(y<sub>ij</sub>) = σ̂² + σ̂<sub>β</sub>² (3 decimals).", a:4.060, tol:0.03,
+    clue:"Add the within-tray and between-tray components.",
+    ex:"0.296 + 3.764 = 4.060. Notice this matches the one-way MSE from the Blocking room (4.06): without Tray in the model, the error term holds both components."},
+   {type:"num", q:"Compute the ICC = σ̂<sub>β</sub>² / (σ̂<sub>β</sub>² + σ̂²) (3 decimals).", a:0.927, tol:0.004,
+    clue:"Divide the between-tray variance by the total variance you just found.",
+    ex:"3.764 / 4.060 ≈ 0.927."},
+   {type:"mc", q:"Which interpretation of ICC ≈ 0.93 is right?",
+    opts:["About 93% of the variability in setting time (for a given method) comes from tray-to-tray differences; two bars on the same tray are highly correlated","Method explains 93% of the variability","There is a 93% chance the methods differ","93% of the trays are defective"], a:0,
+    clue:"ICC splits the variance of a single run into a between-tray part and a within-tray part. Method is not in the ICC.",
+    ex:"A large ICC says trays dominate the noise, which is why blocking on Tray paid off so much in Room 2. A practical follow-up: standardize or maintain trays to reduce σ<sub>β</sub>²."}
+  ]
+},
+{
+  id:"r4", name:"Room 4 · Factorial Design",
+  intro:`<p class="story">Last stop. The hard-candy team studies how <b>Factor A: Cook Temperature</b> (145 °C, 155 °C) and <b>Factor B: Stir Time</b> (Short, Long) affect candy hardness (N). Three independent batches were made at each combination. Average hardness:</p>
+  <table><thead><tr><th>Temperature</th><th>Short</th><th>Long</th></tr></thead><tbody>
+   <tr><td>145 °C</td><td>40</td><td>48</td></tr><tr><td>155 °C</td><td>47</td><td>43</td></tr></tbody></table>
+  <table><thead><tr><th>Source</th><th>Df</th><th>Sum Sq</th><th>Mean Sq</th><th>F</th><th>p</th></tr></thead><tbody>
+   <tr><td>Temperature (A)</td><td>1</td><td>3</td><td>3</td><td>0.96</td><td>0.356</td></tr>
+   <tr><td>Stir Time (B)</td><td>1</td><td>12</td><td>12</td><td>3.84</td><td>0.086</td></tr>
+   <tr><td>A × B</td><td>1</td><td>108</td><td>108</td><td>34.56</td><td>0.00037</td></tr>
+   <tr><td>Residuals</td><td>8</td><td>25</td><td>3.125</td><td></td><td></td></tr></tbody></table>`,
+  qs:[
+   {type:"mc", q:"How many treatment combinations and runs, and how should the runs be ordered?",
+    opts:["4 combinations, 12 runs; run all 12 in a completely random order","4 combinations, 12 runs; do all 145 °C batches first, then 155 °C, to save heating time","2 combinations, 6 runs; randomize within each temperature","4 combinations, 4 runs; the 3 batches are measurement repeats"], a:0,
+    clue:"2 levels × 2 levels, then multiply by the number of independent batches per combination.",
+    ex:"2 × 2 = 4 combinations × 3 replicates = 12 runs. Randomize the order of all 12 (for example, number them and shuffle) so equipment drift, operator fatigue, or humidity cannot line up with a factor. Grouping by temperature would be a restricted (split-plot-like) design, which the ANOVA above does not assume."},
+   {type:"num", q:"Main effect of Temperature (A).", a:1, tol:0.01,
+    clue:"Average at 155 °C minus average at 145 °C: (47 + 43)/2 − (40 + 48)/2.",
+    ex:"45 − 44 = 1 N. Check against the ANOVA: for a 2² design with n replicates, SS = n × effect² = 3 × 1² = 3. ✓"},
+   {type:"num", q:"Main effect of Stir Time (B).", a:2, tol:0.01,
+    clue:"Average at Long minus average at Short.",
+    ex:"(48 + 43)/2 − (40 + 47)/2 = 45.5 − 43.5 = 2 N. SS = 3 × 2² = 12. ✓"},
+   {type:"num", q:"Temperature × Stir Time interaction effect (use the standard 2² formula).", a:-6, tol:0.01,
+    clue:"AB = [ (A high, B high) + (A low, B low) − (A high, B low) − (A low, B high) ] / 2. Watch the sign.",
+    ex:"AB = (43 + 40 − 47 − 48) / 2 = −12 / 2 = −6 N. SS = 3 × (−6)² = 108. ✓ Same answer as half the difference of the temperature effects at each stir time: [(43 − 48) − (47 − 40)] / 2 = −6."},
+   {type:"mc", q:"Which hypotheses test the interaction?",
+    opts:["H₀: (τβ)<sub>ij</sub> = 0 for all i, j  vs.  H₁: at least one (τβ)<sub>ij</sub> ≠ 0","H₀: τ<sub>1</sub> = τ<sub>2</sub> = 0  vs.  H₁: at least one τ<sub>i</sub> ≠ 0","H₀: AB = −6  vs.  H₁: AB ≠ −6","H₀: μ<sub>Short</sub> = μ<sub>Long</sub>  vs.  H₁: μ<sub>Short</sub> ≠ μ<sub>Long</sub>"], a:0,
+    clue:"The interaction parameters in y<sub>ijk</sub> = μ + τ<sub>i</sub> + β<sub>j</sub> + (τβ)<sub>ij</sub> + ε<sub>ijk</sub>.",
+    ex:"Option 2 is the Temperature main-effect test; option 4 is the Stir Time main-effect test; option 3 uses an estimate in a hypothesis."},
+   {type:"mc", q:"At α = 0.05, which effects are significant?",
+    opts:["Only the A × B interaction (p = 0.00037)","Temperature and the interaction","Stir Time and the interaction","All three"], a:0, showPlot:true,
+    clue:"Compare each p-value to 0.05. Stir Time's 0.086 is close, but not below.",
+    ex:"Only the interaction is significant. Once the interaction is significant, the main effects must be interpreted with care. The plot below shows why."},
+   {type:"mc", q:"A shift lead says: \"Temperature isn't significant, so it doesn't matter what temperature we cook at.\" Your response?",
+    opts:["Disagree. Temperature raises hardness by 7 N with a Short stir (40 → 47) but lowers it by 5 N with a Long stir (48 → 43). The effects cancel in the main-effect average, and the significant interaction says the temperature effect depends on stir time","Agree. p = 0.356 shows temperature has no effect","Agree, but only for short stirs","Disagree, because the F-value for temperature is close to 1"], a:0,
+    clue:"Compute the temperature effect separately at each stir time (simple effects).",
+    ex:"A non-significant main effect with a strong interaction means \"no effect on average,\" not \"no effect.\" This is the crossing-lines pattern in the plot. The same argument works for whichever factor the exam calls non-significant."},
+
+  ]
+}
+];
+
+/* ---------------- State ---------------- */
+const state = {room:0, unlocked:99, pts:{}, solved:{}, clues:{}, wrong:{}};
+function key(r,i){return r+"-"+i}
+
+function totalPossible(){return ROOMS.reduce((s,r)=>s+r.qs.length*10,0)}
+function totalScore(){return Object.values(state.pts).reduce((a,b)=>a+b,0)}
+function roomDone(r){return ROOMS[r].qs.every((_,i)=>state.solved[key(r,i)])}
+
+function renderBar(){
+  const bar=document.getElementById("bar"); bar.innerHTML="";
+  ROOMS.forEach((r,idx)=>{
+    const b=document.createElement("button"); b.textContent=(roomDone(idx)?"✓ ":"")+r.name;
+    if(idx===state.room) b.className="active";
+    b.disabled = idx>=state.unlocked;
+    b.onclick=()=>{state.room=idx;render()};
+    bar.appendChild(b);
+  });
+  const s=document.createElement("button"); s.textContent="Debrief";
+  s.disabled = state.unlocked<=ROOMS.length; if(state.room===ROOMS.length) s.className="active";
+  s.onclick=()=>{state.room=ROOMS.length;render()}; bar.appendChild(s);
+  const sc=document.createElement("span"); sc.className="score";
+  sc.innerHTML=`Score <b>${totalScore()}</b> / ${totalPossible()}`; bar.appendChild(sc);
+}
+
+function plotSVG(){
+  // Interaction plot for Room 4
+  const W=420,H=240,x0=60,x1=360,yTop=30,yBot=190,ymin=38,ymax=50;
+  const Y=v=>yBot-(v-ymin)/(ymax-ymin)*(yBot-yTop);
+  let ticks=""; for(let v=38;v<=50;v+=2){ticks+=`<line x1="${x0-4}" x2="${x0}" y1="${Y(v)}" y2="${Y(v)}" stroke="#999"/><text x="${x0-8}" y="${Y(v)+4}" font-size="11" text-anchor="end" fill="#555">${v}</text>`}
+  return `<svg viewBox="0 0 ${W} ${H}" width="100%" style="max-width:${W}px" role="img" aria-label="Interaction plot">
+   <line x1="${x0}" x2="${x0}" y1="${yTop-10}" y2="${yBot}" stroke="#999"/><line x1="${x0}" x2="${x1+20}" y1="${yBot}" y2="${yBot}" stroke="#999"/>${ticks}
+   <text x="${x0+20}" y="${yBot+20}" font-size="12" fill="#333">Short</text><text x="${x1-20}" y="${yBot+20}" font-size="12" fill="#333">Long</text>
+   <text x="${(x0+x1)/2}" y="${H-8}" font-size="12" text-anchor="middle" fill="#333">Stir Time</text>
+   <text x="14" y="${(yTop+yBot)/2}" font-size="12" fill="#333" transform="rotate(-90 14 ${(yTop+yBot)/2})" text-anchor="middle">Mean hardness (N)</text>
+   <polyline points="${x0+35},${Y(40)} ${x1-5},${Y(48)}" fill="none" stroke="#1a1a1a" stroke-width="2.5"/>
+   <polyline points="${x0+35},${Y(47)} ${x1-5},${Y(43)}" fill="none" stroke="#FDB719" stroke-width="2.5"/>
+   <circle cx="${x0+35}" cy="${Y(40)}" r="4" fill="#1a1a1a"/><circle cx="${x1-5}" cy="${Y(48)}" r="4" fill="#1a1a1a"/>
+   <circle cx="${x0+35}" cy="${Y(47)}" r="4" fill="#FDB719"/><circle cx="${x1-5}" cy="${Y(43)}" r="4" fill="#FDB719"/>
+   <text x="${x1+2}" y="${Y(48)+4}" font-size="12" fill="#1a1a1a">145 °C</text><text x="${x1+2}" y="${Y(43)+4}" font-size="12" fill="#a07400">155 °C</text>
+  </svg><div class="muted">Crossing lines: the temperature effect flips sign between Short and Long.</div>`;
+}
+
+function render(){
+  renderBar();
+  const m=document.getElementById("main"); m.innerHTML="";
+  if(state.room===ROOMS.length){renderDebrief(m);return}
+  const r=ROOMS[state.room], ri=state.room;
+  const h=document.createElement("h2"); h.textContent=r.name; h.style.marginTop="6px"; m.appendChild(h);
+  const intro=document.createElement("div"); intro.innerHTML=r.intro; m.appendChild(intro);
+  r.qs.forEach((q,i)=>m.appendChild(renderQ(ri,i,q)));
+  if(ri===3){ const pw=document.createElement("div"); pw.className="plotwrap"; pw.id="plot"; pw.innerHTML=plotSVG(); m.appendChild(pw);
+    if(state.solved[key(3,5)]) pw.style.display="block"; }
+  const nx=document.createElement("div"); nx.className="next";
+  nx.innerHTML = ri<ROOMS.length-1 ? `<button class="btn gold">Go to ${ROOMS[ri+1].name} →</button>` : `<button class="btn gold">Open the debrief →</button>`;
+  nx.querySelector("button").onclick=()=>{state.room=ri+1;window.scrollTo(0,0);render()};
+  nx.style.display="block";
+  nx.id="next"; m.appendChild(nx);
+}
+
+function renderQ(ri,i,q){
+  const k=key(ri,i), d=document.createElement("div"); d.className="q"+(state.solved[k]?" done":"");
+  d.innerHTML=`<div class="qhead">Q${i+1}. ${q.q}<span class="tag">${q.type==="num"?"enter a number":"pick one"}</span></div>`;
+  const fb=document.createElement("div"); fb.className="fb";
+  const clue=document.createElement("div"); clue.className="clue"; clue.innerHTML="<b>Clue.</b> "+q.clue;
+  const ex=document.createElement("div"); ex.className="explain"; ex.innerHTML="<b>Why.</b> "+q.ex;
+  if(state.clues[k]) clue.style.display="block";
+  if(state.solved[k]) ex.style.display="block";
+
+  if(q.type==="mc"){
+    // shuffle once per question, stable across re-renders
+    if(!q.order){q.order=q.opts.map((_,j)=>j).sort(()=>Math.random()-0.5)}
+    const box=document.createElement("div"); box.className="opts";
+    q.order.forEach(j=>{
+      const b=document.createElement("button"); b.className="opt"; b.innerHTML=q.opts[j];
+      if(state.solved[k]&&j===q.a) b.classList.add("right");
+      b.onclick=()=>{
+        if(state.solved[k]) return;
+        if(j===q.a){ b.classList.add("right"); solve(ri,i,d,ex,fb,q) }
+        else { b.classList.add("wrong"); miss(k,fb) }
+      };
+      box.appendChild(b);
+    });
+    d.appendChild(box);
+  } else {
+    const row=document.createElement("div"); row.className="num";
+    const inp=document.createElement("input"); inp.type="text"; inp.inputMode="decimal"; inp.placeholder="your answer";
+    const go=document.createElement("button"); go.className="btn"; go.textContent="Check";
+    if(state.solved[k]){inp.value=q.a; inp.disabled=true; go.disabled=true}
+    const check=()=>{
+      if(state.solved[k]) return;
+      const v=parseFloat(inp.value.replace(/[^\d.\-]/g,""));
+      if(isNaN(v)){fb.className="fb bad";fb.textContent="Enter a number.";return}
+      if(Math.abs(v-q.a)<=q.tol){ inp.disabled=true; go.disabled=true; solve(ri,i,d,ex,fb,q) }
+      else miss(k,fb, v);
+    };
+    go.onclick=check; inp.onkeydown=e=>{if(e.key==="Enter")check()};
+    row.appendChild(inp); row.appendChild(go); d.appendChild(row);
+  }
+  const rb=document.createElement("div"); rb.className="rowbtns";
+  const cb=document.createElement("button"); cb.className="btn ghost"; cb.textContent="Clue (−3)";
+  if(state.clues[k]||state.solved[k]) cb.style.display="none";
+  cb.onclick=()=>{state.clues[k]=true; clue.style.display="block"; cb.style.display="none"};
+  rb.appendChild(cb); d.appendChild(rb); d.appendChild(clue); d.appendChild(fb); d.appendChild(ex);
+  return d;
+}
+
+function miss(k,fb,v){
+  state.wrong[k]=(state.wrong[k]||0)+1;
+  fb.className="fb bad";
+  fb.textContent = v!==undefined ? `Not yet (${v}). Recheck your setup${state.clues[k]?"":", or take a clue"}.` : `Not that one${state.clues[k]?"":". Try again, or take a clue"}.`;
+}
+
+function solve(ri,i,d,ex,fb,q){
+  const k=key(ri,i);
+  state.solved[k]=true;
+  let p=10-(state.clues[k]?3:0)-2*(state.wrong[k]||0); state.pts[k]=Math.max(2,p);
+  d.classList.add("done"); ex.style.display="block";
+  fb.className="fb"; fb.innerHTML=`<b style="color:var(--ok)">Unlocked</b> · +${state.pts[k]} pts`;
+  const cbs=d.querySelectorAll(".btn.ghost"); cbs.forEach(c=>c.style.display="none");
+  if(q.showPlot){const pw=document.getElementById("plot"); if(pw) pw.style.display="block"}
+  if(roomDone(ri)){ state.unlocked=Math.max(state.unlocked,ri+2); document.getElementById("next").style.display="block"; }
+  renderBar();
+}
+
+function renderDebrief(m){
+  const tot=totalScore(), poss=totalPossible();
+  let rows="", review=[];
+  ROOMS.forEach((r,ri)=>{
+    let s=0,c=0,w=0;
+    r.qs.forEach((q,i)=>{const k=key(ri,i); s+=state.pts[k]||0; if(state.clues[k])c++; w+=state.wrong[k]||0;
+      if(state.clues[k]||state.wrong[k]) review.push(`<li><b>${r.name.split("· ")[1]}:</b> ${q.q.replace(/<[^>]+>/g,"")}</li>`)});
+    rows+=`<tr><td>${r.name}</td><td>${s} / ${r.qs.length*10}</td><td>${c}</td><td>${w}</td></tr>`;
+  });
+  m.innerHTML=`<h2 style="margin-top:6px">Shift complete. You escaped the factory.</h2>
+  <p>Final score: <b>${tot} / ${poss}</b> (${Math.round(100*tot/poss)}%).</p>
+  <table class="summary"><thead><tr><th>Room</th><th>Points</th><th>Clues</th><th>Wrong tries</th></tr></thead><tbody>${rows}</tbody></table>
+  <div class="callout"><b>Review before the exam.</b> These are the questions where you used a clue or missed at least once:
+   <ul>${review.length?review.join(""):"<li>None. Clean run.</li>"}</ul></div>
+  <h3 style="margin-top:18px">Exam 2 checklist</h3>
+  <ul>
+   <li><b>Regression output.</b> Write the fitted equation from the Estimate column, state H₀/H₁ on the parameter, use the p-value, and plug in carefully.</li>
+   <li><b>Curvature.</b> Explain what the sign of β̂₂ means for the process, in words a production engineer would use.</li>
+   <li><b>Intervals.</b> A PI is wider than a CI because it includes the new observation's own error.</li>
+   <li><b>Blocking.</b> Choose the block that removes the most variation from MSE; cite F, p and MSE from both tables.</li>
+   <li><b>Ignoring a block.</b> Its SS and df fall into the error; MSE grows and F for treatments shrinks.</li>
+   <li><b>Mixed models.</b> Fixed = levels of interest; random = sample from a population. Define every symbol in the model.</li>
+   <li><b>Variance components.</b> σ̂² = MSE; σ̂<sub>block</sub>² = (MS<sub>block</sub> − MSE) / (number of treatments); ICC = σ̂<sub>block</sub>² / (σ̂<sub>block</sub>² + σ̂²).</li>
+   <li><b>2² factorials.</b> Main effect = high average − low average; AB = [(++) + (−−) − (+−) − (−+)] / 2; SS = n × effect².</li>
+   <li><b>Interactions.</b> A non-significant main effect does not mean no effect when the interaction is significant. Recommend from cell means.</li>
+  </ul>
+  <p class="muted">Reload the page to play again. Answer options are shuffled each time.</p>`;
+}
+
+render();
+</script>
+</body>
+</html>
