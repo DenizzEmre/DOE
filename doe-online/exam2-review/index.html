@@ -188,7 +188,7 @@ const ROOMS = [
 },
 {
   id:"r4", name:"Room 4 · Factorial Design",
-  intro:`<p class="story">Last stop. The hard-candy team studies how <b>Factor A: Cook Temperature</b> (145 °C, 155 °C) and <b>Factor B: Stir Time</b> (Short, Long) affect candy hardness (N). Three independent batches were made at each combination. Average hardness:</p>
+  intro:`<p class="story">Last stop. The hard-candy team studies how <b>Factor A: Cook Temperature</b> (145 °C, 155 °C) and <b>Factor B: Stir Time</b> (Short, Long) affect break force, the force needed to snap a candy (N). Three independent batches were made at each combination. Average break force:</p>
   <table><thead><tr><th>Temperature</th><th>Short</th><th>Long</th></tr></thead><tbody>
    <tr><td>145 °C</td><td>40</td><td>48</td></tr><tr><td>155 °C</td><td>47</td><td>43</td></tr></tbody></table>
   <table><thead><tr><th>Source</th><th>Df</th><th>Sum Sq</th><th>Mean Sq</th><th>F</th><th>p</th></tr></thead><tbody>
@@ -201,15 +201,6 @@ const ROOMS = [
     opts:["4 combinations, 12 runs; run all 12 in a completely random order","4 combinations, 12 runs; do all 145 °C batches first, then 155 °C, to save heating time","2 combinations, 6 runs; randomize within each temperature","4 combinations, 4 runs; the 3 batches are measurement repeats"], a:0,
     clue:"2 levels × 2 levels, then multiply by the number of independent batches per combination.",
     ex:"2 × 2 = 4 combinations × 3 replicates = 12 runs. Randomize the order of all 12 (for example, number them and shuffle) so equipment drift, operator fatigue, or humidity cannot line up with a factor. Grouping by temperature would be a restricted (split-plot-like) design, which the ANOVA above does not assume."},
-   {type:"num", q:"Main effect of Temperature (A).", a:1, tol:0.01,
-    clue:"Average at 155 °C minus average at 145 °C: (47 + 43)/2 − (40 + 48)/2.",
-    ex:"45 − 44 = 1 N. Check against the ANOVA: for a 2² design with n replicates, SS = n × effect² = 3 × 1² = 3. ✓"},
-   {type:"num", q:"Main effect of Stir Time (B).", a:2, tol:0.01,
-    clue:"Average at Long minus average at Short.",
-    ex:"(48 + 43)/2 − (40 + 47)/2 = 45.5 − 43.5 = 2 N. SS = 3 × 2² = 12. ✓"},
-   {type:"num", q:"Temperature × Stir Time interaction effect (use the standard 2² formula).", a:-6, tol:0.01,
-    clue:"AB = [ (A high, B high) + (A low, B low) − (A high, B low) − (A low, B high) ] / 2. Watch the sign.",
-    ex:"AB = (43 + 40 − 47 − 48) / 2 = −12 / 2 = −6 N. SS = 3 × (−6)² = 108. ✓ Same answer as half the difference of the temperature effects at each stir time: [(43 − 48) − (47 − 40)] / 2 = −6."},
    {type:"mc", q:"Which hypotheses test the interaction?",
     opts:["H₀: (τβ)<sub>ij</sub> = 0 for all i, j  vs.  H₁: at least one (τβ)<sub>ij</sub> ≠ 0","H₀: τ<sub>1</sub> = τ<sub>2</sub> = 0  vs.  H₁: at least one τ<sub>i</sub> ≠ 0","H₀: AB = −6  vs.  H₁: AB ≠ −6","H₀: μ<sub>Short</sub> = μ<sub>Long</sub>  vs.  H₁: μ<sub>Short</sub> ≠ μ<sub>Long</sub>"], a:0,
     clue:"The interaction parameters in y<sub>ijk</sub> = μ + τ<sub>i</sub> + β<sub>j</sub> + (τβ)<sub>ij</sub> + ε<sub>ijk</sub>.",
@@ -218,8 +209,12 @@ const ROOMS = [
     opts:["Only the A × B interaction (p = 0.00037)","Temperature and the interaction","Stir Time and the interaction","All three"], a:0, showPlot:true,
     clue:"Compare each p-value to 0.05. Stir Time's 0.086 is close, but not below.",
     ex:"Only the interaction is significant. Once the interaction is significant, the main effects must be interpreted with care. The plot below shows why."},
+   {type:"mc", q:"Based on the ANOVA, do Temperature and Stir Time have an effect on break force?",
+    opts:["Yes, both do, but through their combination: neither main effect is significant (p = 0.356, 0.086), while the A × B interaction is (p = 0.00037), so the effect of one factor depends on the level of the other","No: neither main effect is significant, so neither factor affects break force","Only Stir Time does, because its p-value (0.086) is the smaller of the two","Only the interaction matters, so Temperature and Stir Time can be set to any level"], a:0,
+    clue:"An interaction is made of the two factors. If A × B is significant, can either factor be ignored?",
+    ex:"A significant interaction means both factors matter: changing Temperature changes break force, but the direction depends on Stir Time (+7 N at Short, −5 N at Long). The main-effect averages hide this because the two changes cancel. So read the interaction first, then look at the cell means or the interaction plot."},
    {type:"mc", q:"A shift lead says: \"Temperature isn't significant, so it doesn't matter what temperature we cook at.\" Your response?",
-    opts:["Disagree. Temperature raises hardness by 7 N with a Short stir (40 → 47) but lowers it by 5 N with a Long stir (48 → 43). The effects cancel in the main-effect average, and the significant interaction says the temperature effect depends on stir time","Agree. p = 0.356 shows temperature has no effect","Agree, but only for short stirs","Disagree, because the F-value for temperature is close to 1"], a:0,
+    opts:["Disagree. Temperature raises break force by 7 N with a Short stir (40 → 47) but lowers it by 5 N with a Long stir (48 → 43). The effects cancel in the main-effect average, and the significant interaction says the temperature effect depends on stir time","Agree. p = 0.356 shows temperature has no effect","Agree, but only for short stirs","Disagree, because the F-value for temperature is close to 1"], a:0,
     clue:"Compute the temperature effect separately at each stir time (simple effects).",
     ex:"A non-significant main effect with a strong interaction means \"no effect on average,\" not \"no effect.\" This is the crossing-lines pattern in the plot. The same argument works for whichever factor the exam calls non-significant."},
 
@@ -260,7 +255,7 @@ function plotSVG(){
    <line x1="${x0}" x2="${x0}" y1="${yTop-10}" y2="${yBot}" stroke="#999"/><line x1="${x0}" x2="${x1+20}" y1="${yBot}" y2="${yBot}" stroke="#999"/>${ticks}
    <text x="${x0+20}" y="${yBot+20}" font-size="12" fill="#333">Short</text><text x="${x1-20}" y="${yBot+20}" font-size="12" fill="#333">Long</text>
    <text x="${(x0+x1)/2}" y="${H-8}" font-size="12" text-anchor="middle" fill="#333">Stir Time</text>
-   <text x="14" y="${(yTop+yBot)/2}" font-size="12" fill="#333" transform="rotate(-90 14 ${(yTop+yBot)/2})" text-anchor="middle">Mean hardness (N)</text>
+   <text x="14" y="${(yTop+yBot)/2}" font-size="12" fill="#333" transform="rotate(-90 14 ${(yTop+yBot)/2})" text-anchor="middle">Mean break force (N)</text>
    <polyline points="${x0+35},${Y(40)} ${x1-5},${Y(48)}" fill="none" stroke="#1a1a1a" stroke-width="2.5"/>
    <polyline points="${x0+35},${Y(47)} ${x1-5},${Y(43)}" fill="none" stroke="#FDB719" stroke-width="2.5"/>
    <circle cx="${x0+35}" cy="${Y(40)}" r="4" fill="#1a1a1a"/><circle cx="${x1-5}" cy="${Y(48)}" r="4" fill="#1a1a1a"/>
@@ -278,7 +273,7 @@ function render(){
   const intro=document.createElement("div"); intro.innerHTML=r.intro; m.appendChild(intro);
   r.qs.forEach((q,i)=>m.appendChild(renderQ(ri,i,q)));
   if(ri===3){ const pw=document.createElement("div"); pw.className="plotwrap"; pw.id="plot"; pw.innerHTML=plotSVG(); m.appendChild(pw);
-    if(state.solved[key(3,5)]) pw.style.display="block"; }
+    if(ROOMS[3].qs.some((q,i)=>q.showPlot&&state.solved[key(3,i)])) pw.style.display="block"; }
   const nx=document.createElement("div"); nx.className="next";
   nx.innerHTML = ri<ROOMS.length-1 ? `<button class="btn gold">Go to ${ROOMS[ri+1].name} →</button>` : `<button class="btn gold">Open the debrief →</button>`;
   nx.querySelector("button").onclick=()=>{state.room=ri+1;window.scrollTo(0,0);render()};
